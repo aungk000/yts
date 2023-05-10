@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">YTS</string>
+    <string name="cover_image">Cover image</string>
+    <string name="label_movie_detail">{title}</string>
+    <string name="plot_summary">Plot summary</string>
+    <string name="search_hint">Search movies</string>
+    <string name="suggested_movies">Suggested movies</string>
+    <string name="similar_movies">Similar movies</string>
+    <string name="new_movies">New movies</string>
+</resources>

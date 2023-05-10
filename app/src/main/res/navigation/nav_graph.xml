@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/fragmentMovieList">
+    <fragment
+        android:id="@+id/fragmentMovieList"
+        android:name="me.ako.yts.presentation.view.FragmentMovieList"
+        android:label="@string/app_name"
+        tools:layout="@layout/fragment_movie_list">
+        <action
+            android:id="@+id/action_fragmentMovieList_to_fragmentMovieDetail"
+            app:destination="@id/fragmentMovieDetail" />
+    </fragment>
+    <fragment
+        android:id="@+id/fragmentMovieDetail"
+        android:name="me.ako.yts.presentation.view.FragmentMovieDetail"
+        android:label="@string/label_movie_detail"
+        tools:layout="@layout/fragment_movie_detail">
+        <argument
+            android:name="movie_id"
+            app:argType="integer" />
+        <argument
+            android:name="title"
+            app:argType="string" />
+        <action
+            android:id="@+id/action_fragmentMovieDetail_to_fragmentMovieList"
+            app:destination="@id/fragmentMovieList"
+            app:popUpTo="@id/fragmentMovieList"
+            app:popUpToInclusive="true"/>
+        <action
+            android:id="@+id/action_fragmentMovieDetail_self"
+            app:destination="@id/fragmentMovieDetail"
+            app:popUpTo="@id/fragmentMovieDetail"
+            app:popUpToInclusive="true"/>
+    </fragment>
+</navigation>
