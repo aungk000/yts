@@ -25,7 +25,11 @@ class AppViewModel @Inject constructor(
     private val retrofit: MovieApiService
 ) : ViewModel() {
     private val _status = MutableLiveData<ApiStatus>()
+    private val _statusSearch = MutableLiveData<ApiStatus>()
+    private val _moviesSearch = MutableLiveData<List<MovieList>>()
     val status: LiveData<ApiStatus> = _status
+    val statusSearch: LiveData<ApiStatus> = _statusSearch
+    val moviesSearch: LiveData<List<MovieList>> = _moviesSearch
     val movies: LiveData<List<MovieEntity>> = repository.getMovies().asLiveData(Dispatchers.IO)
 
     init {
@@ -51,21 +55,21 @@ class AppViewModel @Inject constructor(
         }
     }
 
-    fun searchMovies(query: String): LiveData<List<MovieList>> {
-        val search = MutableLiveData<List<MovieList>>()
+    fun searchMovies(query: String) {
         viewModelScope.launch {
+            _statusSearch.value = ApiStatus.Loading
             try {
                 val response = retrofit.searchMovies(query)
-                search.value = response.data.movies
                 Log.d("AppViewModel", "searchMovies Status: ${response.status}")
                 Log.d("AppViewModel", "searchMovies Status Message: ${response.status_message}")
+                _moviesSearch.value = response.data.movies
+                _statusSearch.value = ApiStatus.Done
             } catch (e: Exception) {
                 Log.d("AppViewModel", "searchMovies Error: ${e.localizedMessage}")
-                search.value = listOf()
+                _moviesSearch.value = listOf()
+                _statusSearch.value = ApiStatus.Error
             }
         }
-
-        return search
     }
 
     fun loadMovie(movie_id: Int): Pair<LiveData<MovieDetail>, LiveData<ApiStatus>> {
