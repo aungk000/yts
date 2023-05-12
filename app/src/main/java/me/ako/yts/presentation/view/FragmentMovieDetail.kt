@@ -39,55 +39,68 @@ class FragmentMovieDetail : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        binding.lifecycleOwner = viewLifecycleOwner
+        binding.apply {
+            lifecycleOwner = viewLifecycleOwner
 
-        viewModel.loadMovie(args.movieId).first.observe(viewLifecycleOwner) {
-            binding.apply {
-                movie = it
-                txtYear.text = it.year.toString()
-                txtGenre.text = it.genres.toString()
-                txtUploadedDate.text = "Uploaded: ${it.date_uploaded}"
-            }
-        }
-
-        viewModel.loadMovie(args.movieId).second.observe(viewLifecycleOwner) {
-            when (it) {
-                ApiStatus.Done -> {
-                    binding.apply {
-                        progressMovieDetail.visibility = View.GONE
-                        layoutMovieDetail.visibility = View.VISIBLE
-                    }
+            viewModel.loadMovie(args.movieId).observe(viewLifecycleOwner) { pair ->
+                pair.second?.let {
+                    this.movie = it
+                    txtYear.text = it.year.toString()
+                    txtGenre.text = it.genres.toString()
+                    val uploaded = "Uploaded: ${it.date_uploaded}"
+                    txtUploadedDate.text = uploaded
                 }
 
-                ApiStatus.Error -> {
-                    Toast.makeText(
-                        requireContext(),
-                        "Error loading movie detail",
-                        Toast.LENGTH_LONG
-                    ).show()
-                    binding.apply {
-                        progressMovieDetail.visibility = View.GONE
-                    }
-                }
+                pair.first?.let {
+                    when (it) {
+                        is ApiStatus.Done -> {
+                            progressMovieDetail.hide()
+                            layoutMovieDetail.visibility = View.VISIBLE
+                        }
 
-                ApiStatus.Loading -> {
-                    binding.apply {
-                        progressMovieDetail.visibility = View.VISIBLE
-                        layoutMovieDetail.visibility = View.INVISIBLE
+                        is ApiStatus.Error -> {
+                            Toast.makeText(requireContext(), it.message, Toast.LENGTH_LONG).show()
+                            progressMovieDetail.hide()
+                            layoutMovieDetail.visibility = View.INVISIBLE
+                        }
+
+                        is ApiStatus.Loading -> {
+                            progressMovieDetail.show()
+                            layoutMovieDetail.visibility = View.INVISIBLE
+                        }
                     }
                 }
             }
-        }
 
-        val adapter = MovieSuggestionAdapter {
-            val action =
-                FragmentMovieDetailDirections.actionFragmentMovieDetailSelf(it.id, it.title)
-            findNavController().navigate(action)
-        }
-        binding.recyclerMovieSuggestion.adapter = adapter
+            val adapter = MovieSuggestionAdapter {
+                val action =
+                    FragmentMovieDetailDirections.actionFragmentMovieDetailSelf(it.id, it.title)
+                findNavController().navigate(action)
+            }
+            recyclerMovieSuggestions.adapter = adapter
 
-        viewModel.loadMovieSuggestion(args.movieId).observe(viewLifecycleOwner) {
-            adapter.submitList(it)
+            viewModel.loadMovieSuggestions(args.movieId).observe(viewLifecycleOwner) { pair ->
+                pair.second?.let {
+                    adapter.submitList(it)
+                }
+
+                pair.first?.let {
+                    when (it) {
+                        is ApiStatus.Done -> {
+                            progressMovieSuggestions.hide()
+                        }
+
+                        is ApiStatus.Error -> {
+                            Toast.makeText(requireContext(), it.message, Toast.LENGTH_LONG).show()
+                            progressMovieSuggestions.hide()
+                        }
+
+                        is ApiStatus.Loading -> {
+                            progressMovieSuggestions.show()
+                        }
+                    }
+                }
+            }
         }
     }
 }

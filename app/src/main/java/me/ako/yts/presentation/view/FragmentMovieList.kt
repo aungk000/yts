@@ -5,6 +5,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.EditorInfo
 import android.widget.Toast
 import androidx.activity.addCallback
 import androidx.fragment.app.Fragment
@@ -62,68 +63,58 @@ class FragmentMovieList : Fragment() {
             findNavController().navigate(action)
         }
 
+        utils.moviesSizeFlow.asLiveData(Dispatchers.IO).observe(viewLifecycleOwner) {
+            Log.d("FragmentMovieList", "moviesSizeFlow: $it")
+            moviesSize = it
+        }
+
         binding.apply {
             recyclerMovieList.adapter = adapter
             swipeRefresh.setOnRefreshListener {
                 viewModel.refreshMovies()
             }
-        }
+            fabNewMovies.setOnClickListener {
+                recyclerMovieList.smoothScrollToPosition(0)
+                fabNewMovies.hide()
+            }
 
-        viewModel.status.observe(viewLifecycleOwner) {
-            when (it) {
-                ApiStatus.Done -> {
-                    binding.apply {
+            viewModel.status.observe(viewLifecycleOwner) {
+                when (it) {
+                    is ApiStatus.Done -> {
                         if (swipeRefresh.isRefreshing) {
                             swipeRefresh.isRefreshing = false
                         }
                     }
-                }
 
-                ApiStatus.Error -> {
-                    Toast.makeText(requireContext(), "Error loading movies", Toast.LENGTH_LONG)
-                        .show()
-                    binding.apply {
+                    is ApiStatus.Error -> {
                         if (swipeRefresh.isRefreshing) {
                             swipeRefresh.isRefreshing = false
                         }
+                        Toast.makeText(requireContext(), it.message, Toast.LENGTH_LONG).show()
                     }
-                }
 
-                ApiStatus.Loading -> {
-                    binding.apply {
+                    is ApiStatus.Loading -> {
                         if (!swipeRefresh.isRefreshing) {
                             swipeRefresh.isRefreshing = true
                         }
                     }
                 }
             }
-        }
 
-        utils.moviesSizeFlow.asLiveData(Dispatchers.IO).observe(viewLifecycleOwner) {
-            Log.d("FragmentMovieList", "moviesSizeFlow: $it")
-            moviesSize = it
-        }
-
-        viewModel.movies.observe(viewLifecycleOwner) {
-            adapter.submitList(it)
-            if (it.size > moviesSize && moviesSize == 0) {
-                lifecycleScope.launch {
-                    utils.updateMoviesSize(it.size)
-                }
-            } else if (it.size > moviesSize) {
-                lifecycleScope.launch {
-                    utils.updateMoviesSize(it.size)
-                }
-
-                binding.apply {
-                    fabNewMovies.visibility = View.VISIBLE
-                    fabNewMovies.setOnClickListener {
-                        recyclerMovieList.smoothScrollToPosition(0)
-                        fabNewMovies.visibility = View.GONE
+            viewModel.movies.observe(viewLifecycleOwner) { list ->
+                adapter.submitList(list)
+                if (list.size > moviesSize && moviesSize == 0) {
+                    lifecycleScope.launch {
+                        utils.updateMoviesSize(list.size)
                     }
+                } else if (list.size > moviesSize) {
+                    lifecycleScope.launch {
+                        utils.updateMoviesSize(list.size)
+                    }
+
+                    fabNewMovies.show()
                 }
             }
-            Log.d("FragmentMovieList", "loadMovies: ${it.size}")
         }
     }
 
@@ -139,40 +130,33 @@ class FragmentMovieList : Fragment() {
         binding.apply {
             searchView.setupWithSearchBar(searchBar)
             recyclerSearch.adapter = adapter
+
             searchView.editText.setOnEditorActionListener { v, actionId, event ->
-                if (v.text.isNotEmpty()) {
+                if (v.text.isNotEmpty() && actionId == EditorInfo.IME_ACTION_SEARCH) {
                     val query = v.text.toString().lowercase()
-                    viewModel.searchMovies(query)
+
+                    viewModel.searchMovies(query).observe(viewLifecycleOwner) {
+                        when(it) {
+                            is ApiStatus.Done -> {
+                                progressSearch.hide()
+                            }
+                            is ApiStatus.Error -> {
+                                progressSearch.hide()
+                                Toast.makeText(requireContext(), it.message, Toast.LENGTH_LONG).show()
+                            }
+                            is ApiStatus.Loading -> {
+                                progressSearch.show()
+                            }
+                        }
+                    }
                 }
 
                 searchView.clearFocusAndHideKeyboard()
                 true
             }
-        }
 
-        viewModel.moviesSearch.observe(viewLifecycleOwner) {
-            adapter.submitList(it)
-        }
-
-        viewModel.statusSearch.observe(viewLifecycleOwner) {
-            when (it) {
-                ApiStatus.Done -> {
-                    if (binding.progressSearch.isShown) {
-                        binding.progressSearch.hide()
-                    }
-                }
-
-                ApiStatus.Error -> {
-                    if (binding.progressSearch.isShown) {
-                        binding.progressSearch.hide()
-                    }
-                    Toast.makeText(requireContext(), "Error searching movies", Toast.LENGTH_LONG)
-                        .show()
-                }
-
-                ApiStatus.Loading -> {
-                    binding.progressSearch.show()
-                }
+            viewModel.moviesSearch.observe(viewLifecycleOwner) {
+                adapter.submitList(it)
             }
         }
     }

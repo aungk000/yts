@@ -18,14 +18,14 @@ interface MovieApiService {
     @GET("list_movies.json")
     suspend fun getMovies(): MovieListResponse
 
-    @GET("list_movies.json")
+    @GET("list_movies.json?sort_by=title&order_by=asc")
     suspend fun searchMovies(@Query("query_term") query: String): MovieListResponse
 
     @GET("movie_details.json")
     suspend fun getMovie(@Query("movie_id") movie_id: Int): MovieDetailResponse
 
     @GET("movie_suggestions.json")
-    suspend fun getSuggestedMovies(@Query("movie_id") movie_id: Int): MovieSuggestionResponse
+    suspend fun getMovieSuggestions(@Query("movie_id") movie_id: Int): MovieSuggestionResponse
 }
 
 object MovieApi {
@@ -56,9 +56,9 @@ object MovieApi {
         retrofit.create(MovieApiService::class.java)
     }
 
-    sealed class ApiStatus {
-        object Loading : ApiStatus()
-        object Error : ApiStatus()
-        object Done : ApiStatus()
+    sealed class ApiStatus(val message: String?) {
+        class Loading(message: String?) : ApiStatus(message)
+        class Error(message: String?) : ApiStatus(message)
+        class Done(message: String?) : ApiStatus(message)
     }
 }

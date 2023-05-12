@@ -1,4 +1,4 @@
-package me.ako.yts.data.datasource.controller
+package me.ako.yts.domain.controller
 
 import android.util.Log
 import kotlinx.coroutines.Dispatchers
@@ -25,11 +25,6 @@ class DataRepositoryImpl(private val dao: MovieDao, private val retrofit: MovieA
         withContext(Dispatchers.IO) {
             try {
                 val response = retrofit.getMovies()
-                Log.d("DataRepositoryImpl", "refreshMovies Status: ${response.status}")
-                Log.d(
-                    "DataRepositoryImpl",
-                    "refreshMovies Status Message: ${response.status_message}"
-                )
                 dao.insertAll(*response.asDatabaseModel())
             } catch (e: Exception) {
                 Log.d("DataRepositoryImpl", "refreshMovies: ${e.localizedMessage}")

@@ -39,6 +39,6 @@ data class MovieSuggestion(
     val small_cover_image: String,
     val medium_cover_image: String,
     val state: String,
-    val date_uploaded: String,
-    val date_uploaded_unix: Long,
+    val date_uploaded: String?,
+    val date_uploaded_unix: Long?,
 )

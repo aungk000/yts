@@ -10,7 +10,7 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
-import me.ako.yts.data.datasource.controller.DataRepositoryImpl
+import me.ako.yts.domain.controller.DataRepositoryImpl
 import me.ako.yts.data.network.MovieApi
 import me.ako.yts.data.network.MovieApiService
 import me.ako.yts.domain.util.Utils

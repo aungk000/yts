@@ -128,11 +128,11 @@
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
                     android:text="@string/similar_movies"
-                    android:layout_width="match_parent"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"/>
 
                 <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/recycler_movie_suggestion"
+                    android:id="@+id/recycler_movie_suggestions"
                     app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
                     android:orientation="horizontal"
                     tools:listitem="@layout/item_movie_suggestion"
@@ -143,12 +143,34 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content" />
 
+                <com.google.android.material.progressindicator.CircularProgressIndicator
+                    android:id="@+id/progress_movie_suggestions"
+                    android:indeterminate="true"
+                    tools:visibility="visible"
+                    android:visibility="gone"
+                    app:hideAnimationBehavior="inward"
+                    app:minHideDelay="@integer/material_motion_duration_medium_1"
+                    app:showAnimationBehavior="outward"
+                    app:showDelay="@integer/material_motion_duration_medium_1"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/txt_similar_movies"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+
             </androidx.constraintlayout.widget.ConstraintLayout>
 
         </androidx.core.widget.NestedScrollView>
 
-        <ProgressBar
+        <com.google.android.material.progressindicator.CircularProgressIndicator
             android:id="@+id/progress_movie_detail"
+            android:indeterminate="true"
+            tools:visibility="visible"
+            android:visibility="gone"
+            app:hideAnimationBehavior="inward"
+            app:minHideDelay="@integer/material_motion_duration_medium_1"
+            app:showAnimationBehavior="outward"
+            app:showDelay="@integer/material_motion_duration_medium_1"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"

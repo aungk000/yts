@@ -25,15 +25,18 @@
         <argument
             android:name="title"
             app:argType="string" />
-        <action
+        <!--<action
             android:id="@+id/action_fragmentMovieDetail_to_fragmentMovieList"
             app:destination="@id/fragmentMovieList"
             app:popUpTo="@id/fragmentMovieList"
-            app:popUpToInclusive="true"/>
-        <action
+            app:popUpToInclusive="true"/>-->
+        <!--<action
             android:id="@+id/action_fragmentMovieDetail_self"
             app:destination="@id/fragmentMovieDetail"
             app:popUpTo="@id/fragmentMovieDetail"
-            app:popUpToInclusive="true"/>
+            app:popUpToInclusive="true"/>-->
+        <action
+            android:id="@+id/action_fragmentMovieDetail_self"
+            app:destination="@id/fragmentMovieDetail" />
     </fragment>
 </navigation>
