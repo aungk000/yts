@@ -7,4 +7,7 @@
     <string name="suggested_movies">Suggested movies</string>
     <string name="similar_movies">Similar movies</string>
     <string name="new_movies">New movies</string>
+    <string name="top_cast">Top cast</string>
+    <string name="movie_detail">Movie detail</string>
+    <string name="more_movies">More movies</string>
 </resources>

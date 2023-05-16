@@ -7,9 +7,8 @@ import me.ako.yts.R
 
 
 @BindingAdapter("load")
-fun bindLoadImage(imageView: ImageView, image: String?) {
-    image?.let {
-        imageView.load(it) {
-        }
+fun bindLoadImage(imageView: ImageView, url: String?) {
+    url?.let {
+        imageView.load(it)
     }
 }

@@ -5,17 +5,19 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.AsyncDifferConfig
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
-import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import me.ako.yts.data.datasource.model.MovieEntity
 import me.ako.yts.databinding.ItemMovieBinding
 
-class MovieAdapter(private val onClicked: (MovieEntity) -> Unit) :
+class MovieAdapter(
+    private val onItemClicked: (MovieEntity) -> Unit
+) :
     ListAdapter<MovieEntity, MovieAdapter.MovieViewHolder>(
         AsyncDifferConfig.Builder(DiffCallback()).build()
     ) {
     private class DiffCallback : DiffUtil.ItemCallback<MovieEntity>() {
         override fun areItemsTheSame(oldItem: MovieEntity, newItem: MovieEntity): Boolean {
-            return oldItem.id == newItem.id
+            return oldItem == newItem
         }
 
         override fun areContentsTheSame(oldItem: MovieEntity, newItem: MovieEntity): Boolean {
@@ -23,12 +25,11 @@ class MovieAdapter(private val onClicked: (MovieEntity) -> Unit) :
         }
     }
 
-    class MovieViewHolder(private val binding: ItemMovieBinding) :
-        RecyclerView.ViewHolder(binding.root) {
+    class MovieViewHolder(private val binding: ItemMovieBinding) : ViewHolder(binding.root) {
         fun onBind(movie: MovieEntity) {
             binding.apply {
                 this.movie = movie
-                txtYear.text = movie.year.toString()
+                txtYear.text = movie.year?.toString()
                 executePendingBindings()
             }
         }
@@ -43,6 +44,8 @@ class MovieAdapter(private val onClicked: (MovieEntity) -> Unit) :
     override fun onBindViewHolder(holder: MovieViewHolder, position: Int) {
         val item = getItem(position)
         holder.onBind(item)
-        holder.itemView.setOnClickListener { onClicked(item) }
+        holder.itemView.setOnClickListener {
+            onItemClicked(item)
+        }
     }
 }

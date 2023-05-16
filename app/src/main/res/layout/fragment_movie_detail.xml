@@ -85,6 +85,45 @@
                 </androidx.cardview.widget.CardView>
 
                 <com.google.android.material.textview.MaterialTextView
+                    android:id="@+id/txt_like_count"
+                    app:drawableStartCompat="@drawable/ic_favorite"
+                    android:drawablePadding="@dimen/padding_large"
+                    android:padding="@dimen/padding_normal"
+                    android:textStyle="bold"
+                    android:textSize="@dimen/text_size_large"
+                    app:layout_constraintTop_toTopOf="@id/card_img"
+                    app:layout_constraintStart_toEndOf="@id/card_img"
+                    tools:text="54"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+
+                <com.google.android.material.textview.MaterialTextView
+                    android:id="@+id/txt_download_count"
+                    app:drawableStartCompat="@drawable/ic_download"
+                    android:drawablePadding="@dimen/padding_large"
+                    android:padding="@dimen/padding_normal"
+                    android:textStyle="bold"
+                    android:textSize="@dimen/text_size_large"
+                    app:layout_constraintTop_toBottomOf="@id/txt_like_count"
+                    app:layout_constraintStart_toEndOf="@id/card_img"
+                    tools:text="211090"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+
+                <com.google.android.material.textview.MaterialTextView
+                    android:id="@+id/txt_imdb_rating"
+                    app:drawableStartCompat="@drawable/imdb_logo"
+                    android:drawablePadding="@dimen/padding_large"
+                    android:padding="@dimen/padding_normal"
+                    android:textStyle="bold"
+                    android:textSize="@dimen/text_size_large"
+                    app:layout_constraintTop_toBottomOf="@id/txt_download_count"
+                    app:layout_constraintStart_toEndOf="@id/card_img"
+                    tools:text="7.6"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+
+                <com.google.android.material.textview.MaterialTextView
                     android:id="@+id/txt_plot"
                     android:textStyle="bold"
                     android:textSize="@dimen/text_size_large"
@@ -120,11 +159,35 @@
                     android:layout_height="wrap_content"/>
 
                 <com.google.android.material.textview.MaterialTextView
+                    android:id="@+id/txt_top_cast"
+                    android:padding="@dimen/padding_normal"
+                    android:textStyle="bold"
+                    android:textSize="@dimen/text_size_large"
+                    app:layout_constraintTop_toBottomOf="@id/txt_uploaded_date"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    android:text="@string/top_cast"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"/>
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/recycler_cast"
+                    android:nestedScrollingEnabled="false"
+                    tools:listitem="@layout/item_cast"
+                    tools:itemCount="4"
+                    app:layout_constraintTop_toBottomOf="@id/txt_top_cast"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"/>
+
+                <com.google.android.material.textview.MaterialTextView
                     android:id="@+id/txt_similar_movies"
                     android:textStyle="bold"
                     android:textSize="@dimen/text_size_large"
                     android:padding="@dimen/padding_normal"
-                    app:layout_constraintTop_toBottomOf="@id/txt_uploaded_date"
+                    app:layout_constraintTop_toBottomOf="@id/recycler_cast"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
                     android:text="@string/similar_movies"
@@ -143,21 +206,6 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content" />
 
-                <com.google.android.material.progressindicator.CircularProgressIndicator
-                    android:id="@+id/progress_movie_suggestions"
-                    android:indeterminate="true"
-                    tools:visibility="visible"
-                    android:visibility="gone"
-                    app:hideAnimationBehavior="inward"
-                    app:minHideDelay="@integer/material_motion_duration_medium_1"
-                    app:showAnimationBehavior="outward"
-                    app:showDelay="@integer/material_motion_duration_medium_1"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/txt_similar_movies"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"/>
-
             </androidx.constraintlayout.widget.ConstraintLayout>
 
         </androidx.core.widget.NestedScrollView>
@@ -167,10 +215,6 @@
             android:indeterminate="true"
             tools:visibility="visible"
             android:visibility="gone"
-            app:hideAnimationBehavior="inward"
-            app:minHideDelay="@integer/material_motion_duration_medium_1"
-            app:showAnimationBehavior="outward"
-            app:showDelay="@integer/material_motion_duration_medium_1"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"

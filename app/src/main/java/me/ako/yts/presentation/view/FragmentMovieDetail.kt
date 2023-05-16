@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ArrayAdapter
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -12,8 +13,14 @@ import androidx.navigation.fragment.navArgs
 import dagger.hilt.android.AndroidEntryPoint
 import me.ako.yts.data.network.MovieApi.ApiStatus
 import me.ako.yts.databinding.FragmentMovieDetailBinding
+import me.ako.yts.domain.util.Utils
 import me.ako.yts.domain.viewmodel.AppViewModel
+import me.ako.yts.presentation.presenter.CastAdapter
 import me.ako.yts.presentation.presenter.MovieSuggestionAdapter
+import javax.inject.Inject
+import kotlin.math.ceil
+import kotlin.math.round
+import kotlin.math.roundToLong
 
 @AndroidEntryPoint
 class FragmentMovieDetail : Fragment() {
@@ -21,6 +28,8 @@ class FragmentMovieDetail : Fragment() {
     private var _binding: FragmentMovieDetailBinding? = null
     private val binding get() = _binding!!
     private val args: FragmentMovieDetailArgs by navArgs()
+    @Inject
+    lateinit var utils: Utils
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -42,32 +51,51 @@ class FragmentMovieDetail : Fragment() {
         binding.apply {
             lifecycleOwner = viewLifecycleOwner
 
-            viewModel.loadMovie(args.movieId).observe(viewLifecycleOwner) { pair ->
-                pair.second?.let {
-                    this.movie = it
-                    txtYear.text = it.year.toString()
-                    txtGenre.text = it.genres.toString()
-                    val uploaded = "Uploaded: ${it.date_uploaded}"
-                    txtUploadedDate.text = uploaded
+            viewModel.loadMovie(args.movieId).observe(viewLifecycleOwner) { movie ->
+                this.movie = movie
+                txtYear.text = movie.year.toString()
+                txtGenre.text = movie.genres?.joinToString(separator = " / ")
+                val uploaded = "Uploaded: ${movie.date_uploaded}"
+                txtUploadedDate.text = uploaded
+
+                movie.like_count?.let { count ->
+                    txtLikeCount.text = utils.shortenNumber(count, 10)
                 }
 
-                pair.first?.let {
-                    when (it) {
-                        is ApiStatus.Done -> {
-                            progressMovieDetail.hide()
-                            layoutMovieDetail.visibility = View.VISIBLE
-                        }
+                movie.download_count?.let { count ->
+                    txtDownloadCount.text = utils.shortenNumber(count, 10)
+                }
 
-                        is ApiStatus.Error -> {
-                            Toast.makeText(requireContext(), it.message, Toast.LENGTH_LONG).show()
-                            progressMovieDetail.hide()
-                            layoutMovieDetail.visibility = View.INVISIBLE
-                        }
+                txtImdbRating.text = movie.rating.toString()
 
-                        is ApiStatus.Loading -> {
-                            progressMovieDetail.show()
-                            layoutMovieDetail.visibility = View.INVISIBLE
-                        }
+                txtImdbRating.setOnClickListener {
+                    utils.imdbTitle(movie.imdb_code)
+                }
+
+                movie.cast?.let { list ->
+                    val castAdapter = CastAdapter(list) {
+                        utils.imdbName(it.imdb_code)
+                    }
+                    recyclerCast.adapter = castAdapter
+                }
+            }
+
+            viewModel.statusMovieDetail.observe(viewLifecycleOwner) {
+                when (it) {
+                    is ApiStatus.Done -> {
+                        progressMovieDetail.hide()
+                        layoutMovieDetail.visibility = View.VISIBLE
+                    }
+
+                    is ApiStatus.Error -> {
+                        Toast.makeText(requireContext(), it.message, Toast.LENGTH_LONG).show()
+                        progressMovieDetail.hide()
+                        layoutMovieDetail.visibility = View.INVISIBLE
+                    }
+
+                    is ApiStatus.Loading -> {
+                        progressMovieDetail.show()
+                        layoutMovieDetail.visibility = View.INVISIBLE
                     }
                 }
             }
@@ -79,27 +107,8 @@ class FragmentMovieDetail : Fragment() {
             }
             recyclerMovieSuggestions.adapter = adapter
 
-            viewModel.loadMovieSuggestions(args.movieId).observe(viewLifecycleOwner) { pair ->
-                pair.second?.let {
-                    adapter.submitList(it)
-                }
-
-                pair.first?.let {
-                    when (it) {
-                        is ApiStatus.Done -> {
-                            progressMovieSuggestions.hide()
-                        }
-
-                        is ApiStatus.Error -> {
-                            Toast.makeText(requireContext(), it.message, Toast.LENGTH_LONG).show()
-                            progressMovieSuggestions.hide()
-                        }
-
-                        is ApiStatus.Loading -> {
-                            progressMovieSuggestions.show()
-                        }
-                    }
-                }
+            viewModel.loadMovieSuggestions(args.movieId).observe(viewLifecycleOwner) {
+                adapter.submitList(it)
             }
         }
     }

@@ -1,12 +1,10 @@
 package me.ako.yts
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import androidx.activity.viewModels
+import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupActionBarWithNavController
-import me.ako.yts.domain.viewmodel.AppViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import me.ako.yts.databinding.ActivityMainBinding
 
