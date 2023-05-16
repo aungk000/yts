@@ -23,7 +23,7 @@ data class MovieDetail(
     val slug: String?,
     val year: Int?,
     val rating: Double?,
-    val runtime: Int?,
+    val runtime: Long?,
     val genres: List<String>?,
     val download_count: Long?,
     val like_count: Int?,

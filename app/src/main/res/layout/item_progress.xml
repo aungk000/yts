@@ -13,7 +13,7 @@
 
         <com.google.android.material.progressindicator.CircularProgressIndicator
             android:id="@+id/progress_more"
-            android:layout_margin="@dimen/padding_large"
+            android:layout_margin="@dimen/dimen_large"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"

@@ -17,8 +17,8 @@ import java.util.concurrent.TimeUnit
 interface MovieApiService {
     @GET("list_movies.json")
     suspend fun getMovies(
-        @Query("limit") limit: Int = 50,
-        @Query("page") page: Int = 1
+        @Query("limit") limit: Int,
+        @Query("page") page: Int
     ): Response<MovieListResponse>
 
     @GET("list_movies.json?sort_by=title&order_by=asc")

@@ -13,6 +13,9 @@
         <action
             android:id="@+id/action_fragmentMovieList_to_fragmentMovieDetail"
             app:destination="@id/fragmentMovieDetail" />
+        <action
+            android:id="@+id/action_fragmentMovieList_to_settingsFragment"
+            app:destination="@id/settingsFragment" />
     </fragment>
     <fragment
         android:id="@+id/fragmentMovieDetail"
@@ -41,4 +44,8 @@
             android:id="@+id/action_fragmentMovieDetail_self"
             app:destination="@id/fragmentMovieDetail" />
     </fragment>
+    <fragment
+        android:id="@+id/settingsFragment"
+        android:name="me.ako.yts.presentation.view.SettingsFragment"
+        android:label="@string/settings"/>
 </navigation>

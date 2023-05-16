@@ -5,20 +5,27 @@ import android.os.Handler
 import android.os.Looper
 import android.util.Log
 import android.view.LayoutInflater
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import android.widget.Toast
 import androidx.activity.addCallback
+import androidx.core.view.MenuProvider
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.asLiveData
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.OnScrollListener
+import com.google.android.material.appbar.MaterialToolbar
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
+import me.ako.yts.R
 import me.ako.yts.data.datasource.model.MovieEntity
 import me.ako.yts.data.network.MovieApi.ApiStatus
 import me.ako.yts.databinding.FragmentMovieListBinding
@@ -60,6 +67,7 @@ class FragmentMovieList : Fragment() {
 
         handleBackPressed()
         setupSearch()
+        addMenuProvider()
 
         utils.moviesSizeFlow.asLiveData(Dispatchers.IO).observe(viewLifecycleOwner) {
             moviesSize = it
@@ -170,6 +178,27 @@ class FragmentMovieList : Fragment() {
         }
     }
 
+    private fun addMenuProvider() {
+        val toolbar: MaterialToolbar = requireActivity().findViewById(R.id.toolbar)
+        toolbar.addMenuProvider(object : MenuProvider {
+            override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
+                menuInflater.inflate(R.menu.main, menu)
+            }
+
+            override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
+                return when (menuItem.itemId) {
+                    R.id.menu_settings -> {
+                        val action =
+                            FragmentMovieListDirections.actionFragmentMovieListToSettingsFragment()
+                        findNavController().navigate(action)
+                        true
+                    }
+                    else -> false
+                }
+            }
+        }, viewLifecycleOwner, Lifecycle.State.RESUMED)
+    }
+
     private fun setupSearch() {
         val adapter = SearchAdapter {
             val action = FragmentMovieListDirections.actionFragmentMovieListToFragmentMovieDetail(
@@ -223,7 +252,7 @@ class FragmentMovieList : Fragment() {
             if (binding.searchView.isShowing) {
                 binding.searchView.hide()
             } else if(layoutManager.findFirstVisibleItemPosition() != 0) {
-                binding.recyclerMovieList.smoothScrollToPosition(0)
+                binding.recyclerMovieList.scrollToPosition(0)
             }
             else {
                 /*val scrollPosition = utils.getScrollPosition(binding.recyclerMovieList)

@@ -4,7 +4,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ArrayAdapter
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -18,9 +17,6 @@ import me.ako.yts.domain.viewmodel.AppViewModel
 import me.ako.yts.presentation.presenter.CastAdapter
 import me.ako.yts.presentation.presenter.MovieSuggestionAdapter
 import javax.inject.Inject
-import kotlin.math.ceil
-import kotlin.math.round
-import kotlin.math.roundToLong
 
 @AndroidEntryPoint
 class FragmentMovieDetail : Fragment() {
@@ -55,6 +51,17 @@ class FragmentMovieDetail : Fragment() {
                 this.movie = movie
                 txtYear.text = movie.year.toString()
                 txtGenre.text = movie.genres?.joinToString(separator = " / ")
+
+                movie.language?.let {
+                    val language = "[${it.uppercase()}]"
+                    txtLanguage.text = language
+                }
+
+                movie.runtime?.let {
+                    val runtime = "${it / 60}h ${it % 60}m"
+                    txtRuntime.text = runtime
+                }
+
                 val uploaded = "Uploaded: ${movie.date_uploaded}"
                 txtUploadedDate.text = uploaded
 
@@ -70,6 +77,10 @@ class FragmentMovieDetail : Fragment() {
 
                 txtImdbRating.setOnClickListener {
                     utils.imdbTitle(movie.imdb_code)
+                }
+
+                txtYoutube.setOnClickListener {
+                    utils.youtube(movie.yt_trailer_code)
                 }
 
                 movie.cast?.let { list ->

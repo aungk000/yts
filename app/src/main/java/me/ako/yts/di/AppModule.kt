@@ -2,6 +2,8 @@ package me.ako.yts.di
 
 import android.app.Application
 import android.content.Context
+import android.content.SharedPreferences
+import androidx.preference.PreferenceManager
 import androidx.room.Room
 import me.ako.yts.data.datasource.MovieDatabase
 import me.ako.yts.domain.controller.DataRepository
@@ -40,6 +42,12 @@ object AppModule {
     @Provides
     fun provideUtils(@ApplicationContext context: Context): Utils {
         return Utils(context)
+    }
+
+    @Singleton
+    @Provides
+    fun providePrefs(app: Application): SharedPreferences {
+        return PreferenceManager.getDefaultSharedPreferences(app)
     }
 
     @Singleton

@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.util.Log
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
@@ -48,19 +49,28 @@ class Utils(private val context: Context) {
         }
     }
 
-    fun getScrollPosition(recyclerView: RecyclerView): Int {
-        val layoutManager = recyclerView.layoutManager as GridLayoutManager
-        return layoutManager.findFirstVisibleItemPosition()
+    fun setTheme(value: String?) {
+        when(value) {
+            "dark" -> {
+                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
+            }
+            "light" -> {
+                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
+            }
+            "system" -> {
+                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
+            }
+        }
     }
 
     fun shortenNumber(count: Int, decimal: Int): String {
         var short = ""
         if (count in 1000..999999) {
             val k = count.toDouble() / 1000
-            short = "${ceil(k * decimal) / decimal} K"
+            short = "${ceil(k * decimal) / decimal}K"
         } else if (count >= 1000000) {
             val m = count.toDouble() / 1000000
-            short = "${ceil(m * decimal) / decimal} M"
+            short = "${ceil(m * decimal) / decimal}M"
         } else {
             short = count.toString()
         }
@@ -72,10 +82,10 @@ class Utils(private val context: Context) {
         var short = ""
         if (count in 1000..999999) {
             val k = count.toDouble() / 1000
-            short = "${ceil(k * decimal) / decimal} K"
+            short = "${ceil(k * decimal) / decimal}K"
         } else if (count >= 1000000) {
             val m = count.toDouble() / 1000000
-            short = "${ceil(m * decimal) / decimal} M"
+            short = "${ceil(m * decimal) / decimal}M"
         } else {
             short = count.toString()
         }
@@ -103,11 +113,11 @@ class Utils(private val context: Context) {
         context.startActivity(intent)
     }
 
-    fun youtubeAppUri(url: String): Uri {
+    private fun youtubeAppUri(url: String): Uri {
         return Uri.parse("vnd.youtube:" + Uri.parse(url).getQueryParameter("v"))
     }
 
-    fun youtubeVideoCode(url: String): String {
+    private fun youtubeVideoCode(url: String): String {
         var code = url.substringAfter("watch?v=")
         if (url.contains("youtu.be")) {
             code = url.substringAfterLast("/")
@@ -126,6 +136,7 @@ class Utils(private val context: Context) {
         val url = "https://www.youtube.com/watch?v=$code"
 
         var intent = Intent(Intent.ACTION_VIEW, youtubeAppUri(url))
+        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
         if (intent.resolveActivity(context.packageManager) == null) {
             intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
         }
