@@ -3,5 +3,6 @@
     <style name="Base.Theme.YTS" parent="Theme.Material3.DayNight.NoActionBar">
         <!-- Customize your dark theme here. -->
         <item name="colorPrimary">@color/primary</item>
+        <item name="colorAccent">@color/primary</item>
     </style>
 </resources>

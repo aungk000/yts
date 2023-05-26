@@ -4,17 +4,16 @@ import android.app.Application
 import android.content.Context
 import android.content.SharedPreferences
 import androidx.preference.PreferenceManager
-import androidx.room.Room
-import me.ako.yts.data.datasource.MovieDatabase
-import me.ako.yts.domain.controller.DataRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
-import me.ako.yts.domain.controller.DataRepositoryImpl
+import me.ako.yts.data.datasource.MovieDatabase
 import me.ako.yts.data.network.MovieApi
 import me.ako.yts.data.network.MovieApiService
+import me.ako.yts.domain.controller.DataRepository
+import me.ako.yts.domain.controller.DataRepositoryImpl
 import me.ako.yts.domain.util.Utils
 import javax.inject.Singleton
 
@@ -25,11 +24,7 @@ object AppModule {
     @Singleton
     @Provides
     fun provideDatabase(app: Application): MovieDatabase {
-        return Room.databaseBuilder(
-            app,
-            MovieDatabase::class.java,
-            "movie_db"
-        ).build()
+        return MovieDatabase.getInstance(app)
     }
 
     @Singleton

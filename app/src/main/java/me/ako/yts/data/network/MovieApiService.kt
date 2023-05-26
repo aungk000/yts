@@ -2,6 +2,7 @@ package me.ako.yts.data.network
 
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
+import me.ako.yts.data.network.model.Api
 import me.ako.yts.data.network.model.MovieDetailResponse
 import me.ako.yts.data.network.model.MovieListResponse
 import me.ako.yts.data.network.model.MovieSuggestionResponse
@@ -21,12 +22,11 @@ interface MovieApiService {
         @Query("page") page: Int
     ): Response<MovieListResponse>
 
-    @GET("list_movies.json?sort_by=title&order_by=asc")
+    @GET("list_movies.json?limit=50")
     suspend fun searchMovies(
-        @Query(
-            "query_term",
-            encoded = true
-        ) query: String
+        @Query("query_term", encoded = true) query: String,
+        @Query("sort_by") sort: String,
+        @Query("order_by") order: String
     ): Response<MovieListResponse>
 
     @GET("movie_details.json?with_cast=true&with_images=true")
@@ -49,7 +49,7 @@ object MovieApi {
             interceptor.level = HttpLoggingInterceptor.Level.HEADERS
             return OkHttpClient.Builder()
                 .connectTimeout(15, TimeUnit.SECONDS)
-                .readTimeout(20, TimeUnit.SECONDS)
+                .readTimeout(15, TimeUnit.SECONDS)
                 .addInterceptor(interceptor)
                 .build()
         }

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <style name="TextWithIcon">
+        <item name="android:drawablePadding">@dimen/dimen_large</item>
         <item name="android:padding">@dimen/dimen_normal</item>
         <item name="android:textAlignment">textEnd</item>
         <item name="android:textStyle">bold</item>

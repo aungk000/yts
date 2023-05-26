@@ -3,6 +3,8 @@ package me.ako.yts.presentation.presenter
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import coil.load
+import me.ako.yts.R
 import me.ako.yts.data.network.model.Cast
 import me.ako.yts.databinding.ItemCastBinding
 
@@ -14,6 +16,9 @@ class CastAdapter(private val list: List<Cast>, private val onClicked: (Cast) ->
         fun onBind(cast: Cast) {
             binding.apply {
                 this.cast = cast
+                imgCast.load(cast.url_small_image) {
+                    error(R.drawable.default_avatar)
+                }
                 val name = "${cast.name} as ${cast.character_name}"
                 txtActorName.text = name
                 executePendingBindings()

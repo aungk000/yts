@@ -6,22 +6,22 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface MovieDao {
-    @Query("SELECT * FROM movie ORDER BY date_uploaded_unix DESC LIMIT :limit OFFSET :offset")
+    @Query("SELECT * FROM movie ORDER BY id DESC LIMIT :limit OFFSET :offset")
     fun getMovies(limit: Int?, offset: Int?): Flow<List<MovieEntity>>
 
-    @Query("SELECT * FROM movie ORDER BY date_uploaded_unix DESC")
+    @Query("SELECT * FROM movie ORDER BY id DESC")
     fun getMovies(): Flow<List<MovieEntity>>
 
     @Query("SELECT * FROM movie WHERE id = :id")
     fun getMovie(id: Int): Flow<MovieEntity>
 
-    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAll(vararg movie: MovieEntity)
 
-    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertMovies(movies: List<MovieEntity>)
 
-    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertMovie(movie: MovieEntity)
 
     @Update

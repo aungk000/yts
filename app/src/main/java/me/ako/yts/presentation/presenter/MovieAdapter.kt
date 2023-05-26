@@ -6,6 +6,8 @@ import androidx.recyclerview.widget.AsyncDifferConfig
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
+import coil.load
+import me.ako.yts.R
 import me.ako.yts.data.datasource.model.MovieEntity
 import me.ako.yts.databinding.ItemMovieBinding
 
@@ -17,7 +19,7 @@ class MovieAdapter(
     ) {
     private class DiffCallback : DiffUtil.ItemCallback<MovieEntity>() {
         override fun areItemsTheSame(oldItem: MovieEntity, newItem: MovieEntity): Boolean {
-            return oldItem == newItem
+            return oldItem.id == newItem.id
         }
         override fun areContentsTheSame(oldItem: MovieEntity, newItem: MovieEntity): Boolean {
             return oldItem == newItem
@@ -28,6 +30,9 @@ class MovieAdapter(
         fun onBind(movie: MovieEntity) {
             binding.apply {
                 this.movie = movie
+                imgCover.load(movie.medium_cover_image) {
+                    error(R.drawable.no_poster)
+                }
                 txtYear.text = movie.year?.toString()
                 executePendingBindings()
             }

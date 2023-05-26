@@ -6,6 +6,8 @@ import androidx.recyclerview.widget.AsyncDifferConfig
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import coil.load
+import me.ako.yts.R
 import me.ako.yts.data.network.model.MovieSuggestion
 import me.ako.yts.databinding.ItemMovieSuggestionBinding
 
@@ -28,7 +30,10 @@ class MovieSuggestionAdapter(private val onClicked: (MovieSuggestion) -> Unit) :
         fun onBind(movie: MovieSuggestion) {
             binding.apply {
                 this.movie = movie
-                txtYear.text = movie.year.toString()
+                imgCover.load(movie.medium_cover_image) {
+                    error(R.drawable.no_poster)
+                }
+                txtYear.text = movie.year?.toString()
                 executePendingBindings()
             }
         }

@@ -1,6 +1,9 @@
 package me.ako.yts.data.datasource
 
+import android.content.Context
+import androidx.room.AutoMigration
 import androidx.room.Database
+import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverter
 import androidx.room.TypeConverters
@@ -13,11 +16,34 @@ import me.ako.yts.data.network.model.Torrent
 @Database(
     entities = [MovieEntity::class],
     version = 1,
-    exportSchema = false
+    exportSchema = true,
+    /*autoMigrations = [
+        AutoMigration(1, 2)
+    ]*/
 )
 @TypeConverters(MovieDatabase.Converters::class)
 abstract class MovieDatabase : RoomDatabase() {
     abstract val dao: MovieDao
+
+    companion object {
+        @Volatile
+        private var INSTANCE: MovieDatabase? = null
+
+        fun getInstance(context: Context): MovieDatabase {
+            return INSTANCE ?: synchronized(this) {
+                val instance = Room.databaseBuilder(
+                    context,
+                    MovieDatabase::class.java,
+                    "movie_db"
+                )
+                    .build()
+
+                INSTANCE = instance
+
+                instance
+            }
+        }
+    }
 
     object Converters {
         @TypeConverter

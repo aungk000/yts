@@ -3,12 +3,12 @@ package me.ako.yts.domain.controller
 import android.util.Log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import me.ako.yts.data.datasource.MovieDao
 import me.ako.yts.data.datasource.model.MovieEntity
 import me.ako.yts.data.network.MovieApiService
 import me.ako.yts.data.network.model.asDatabaseModel
-import me.ako.yts.data.network.model.asDatabaseModelArray
 
 class DataRepositoryImpl(private val dao: MovieDao, private val retrofit: MovieApiService) :
     DataRepository {

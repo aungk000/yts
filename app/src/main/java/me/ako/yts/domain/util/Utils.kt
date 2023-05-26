@@ -4,31 +4,41 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.util.Log
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
+import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
-import androidx.recyclerview.widget.GridLayoutManager
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
+import me.ako.yts.data.network.model.Api
 import kotlin.math.ceil
-import kotlin.math.round
 
 class Utils(private val context: Context) {
     private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "prefs")
     private val MOVIES_SIZE = intPreferencesKey("movies_size")
     private val LAST_SCROLL_POSITION = intPreferencesKey("last_scroll_position")
+    private val SORT = stringPreferencesKey("sort")
+    private val ORDER = stringPreferencesKey("order")
+
     val moviesSizeFlow: Flow<Int> = context.dataStore.data.map {
         it[MOVIES_SIZE] ?: 0
     }
     val lastScrollPosition: Flow<Int> = context.dataStore.data.map {
         it[LAST_SCROLL_POSITION] ?: 0
+    }
+
+    val sortFlow: Flow<String> = context.dataStore.data.map {
+        it[SORT] ?: "title"
+    }
+
+    val orderFlow: Flow<String> = context.dataStore.data.map {
+        it[ORDER] ?: "desc"
     }
 
     suspend fun updateMoviesSize(size: Int) {
@@ -41,7 +51,7 @@ class Utils(private val context: Context) {
     suspend fun updateLastScrollPosition(position: Int) {
         withContext(Dispatchers.IO) {
             context.dataStore.edit {
-                if(position >= 0) {
+                if (position >= 0) {
                     it[LAST_SCROLL_POSITION] = position
                 }
                 Log.d("Utils", "updateLastScrollPosition: ${it[LAST_SCROLL_POSITION]}")
@@ -49,33 +59,34 @@ class Utils(private val context: Context) {
         }
     }
 
+    suspend fun updateSort(sort: String) {
+        context.dataStore.edit {
+            it[SORT] = sort
+            Log.d("Utils", "sort: ${it[SORT]}")
+        }
+    }
+
+    suspend fun updateOrder(order: String) {
+        context.dataStore.edit {
+            it[ORDER] = order
+            Log.d("Utils", "order: ${it[ORDER]}")
+        }
+    }
+
     fun setTheme(value: String?) {
-        when(value) {
+        when (value) {
             "dark" -> {
                 AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
             }
+
             "light" -> {
                 AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
             }
+
             "system" -> {
                 AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
             }
         }
-    }
-
-    fun shortenNumber(count: Int, decimal: Int): String {
-        var short = ""
-        if (count in 1000..999999) {
-            val k = count.toDouble() / 1000
-            short = "${ceil(k * decimal) / decimal}K"
-        } else if (count >= 1000000) {
-            val m = count.toDouble() / 1000000
-            short = "${ceil(m * decimal) / decimal}M"
-        } else {
-            short = count.toString()
-        }
-
-        return short
     }
 
     fun shortenNumber(count: Long, decimal: Int): String {
@@ -97,6 +108,10 @@ class Utils(private val context: Context) {
         val intent =
             Intent(Intent.ACTION_VIEW, Uri.parse(url))
         context.startActivity(intent)
+    }
+
+    fun toast(text: String) {
+        Toast.makeText(context, text, Toast.LENGTH_LONG).show()
     }
 
     fun imdbTitle(code: String?) {

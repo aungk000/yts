@@ -1,9 +1,6 @@
 package me.ako.yts.presentation.view
 
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuInflater
@@ -13,11 +10,13 @@ import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import android.widget.Toast
 import androidx.activity.addCallback
+import androidx.appcompat.app.AlertDialog
 import androidx.core.view.MenuProvider
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.asLiveData
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -25,9 +24,11 @@ import androidx.recyclerview.widget.RecyclerView.OnScrollListener
 import com.google.android.material.appbar.MaterialToolbar
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import me.ako.yts.R
 import me.ako.yts.data.datasource.model.MovieEntity
 import me.ako.yts.data.network.MovieApi.ApiStatus
+import me.ako.yts.data.network.model.Api
 import me.ako.yts.databinding.FragmentMovieListBinding
 import me.ako.yts.domain.util.Utils
 import me.ako.yts.domain.viewmodel.AppViewModel
@@ -44,11 +45,10 @@ class FragmentMovieList : Fragment() {
 
     @Inject
     lateinit var utils: Utils
-    private var moviesSize = 0
-    private var lastScrollPosition = 0
-    private var once = true
     private var isLoading = false
     private var movies = listOf<MovieEntity>()
+    private var searchSort = Api.Endpoint.Parameter.Sort.Title.type
+    private var searchOrder = Api.Endpoint.Parameter.Order.Desc.type
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -69,16 +69,17 @@ class FragmentMovieList : Fragment() {
         setupSearch()
         addMenuProvider()
 
-        utils.moviesSizeFlow.asLiveData(Dispatchers.IO).observe(viewLifecycleOwner) {
-            moviesSize = it
+        viewModel.sort.observe(viewLifecycleOwner) {
+            searchSort = it
         }
 
-        utils.lastScrollPosition.asLiveData(Dispatchers.IO).observe(viewLifecycleOwner) {
-            lastScrollPosition = it
+        viewModel.order.observe(viewLifecycleOwner) {
+            searchOrder = it
         }
 
         binding.apply {
             lifecycleOwner = viewLifecycleOwner
+            appViewModel = viewModel
 
             val adapter = MovieAdapter {
                 val action =
@@ -101,6 +102,12 @@ class FragmentMovieList : Fragment() {
                         isLoading = true
                         viewModel.loadMore()
                     }
+
+                    if (!isLoading &&
+                        fabNewMovies.isVisible &&
+                        layoutManager.findFirstCompletelyVisibleItemPosition() == 0) {
+                        fabNewMovies.hide()
+                    }
                 }
             })
 
@@ -108,52 +115,14 @@ class FragmentMovieList : Fragment() {
                 viewModel.refreshMovies(1)
             }
 
-            fabNewMovies.setOnClickListener {
-                recyclerMovieList.smoothScrollToPosition(0)
-                fabNewMovies.hide()
-            }
-
             viewModel.movies.observe(viewLifecycleOwner) {
                 movies = it
                 adapter.submitList(it)
-
-                /*Log.d("FragmentMovieList", "onViewCreated: list: ${list.size}")
-                if (list.isEmpty()) {
-                    Toast.makeText(requireContext(), "No more data", Toast.LENGTH_LONG).show()
-                } else {
-                    val set = HashSet(list).sortedByDescending {
-                        it.date_uploaded_unix
-                    }
-
-                    Log.d("FragmentMovieList", "onViewCreated: movieSet: ${viewModel.movieSet.size}")
-                    viewModel.movieSet.addAll(set)
-                    adapter.submitList(viewModel.movieSet.toList())
-                }*/
-
-                /*if (once) {
-                    recyclerMovieList.scrollToPosition(lastScrollPosition)
-                    once = !once
-                }*/
-
-                /*if (it.size > moviesSize && moviesSize == 0) {
-                    lifecycleScope.launch {
-                        utils.updateMoviesSize(it.size)
-                    }
-                } else if (it.size > moviesSize) {
-                    lifecycleScope.launch {
-                        utils.updateMoviesSize(it.size)
-                    }
-
-                    fabNewMovies.show()
-                }*/
             }
 
             viewModel.statusMovies.observe(viewLifecycleOwner) { status ->
                 when (status) {
                     is ApiStatus.Done -> {
-                        if (swipeRefresh.isRefreshing) {
-                            swipeRefresh.isRefreshing = false
-                        }
                         isLoading = false
                         status.message?.let { message ->
                             Toast.makeText(requireContext(), message, Toast.LENGTH_LONG).show()
@@ -161,18 +130,22 @@ class FragmentMovieList : Fragment() {
                     }
 
                     is ApiStatus.Error -> {
-                        if (swipeRefresh.isRefreshing) {
-                            swipeRefresh.isRefreshing = false
-                        }
                         isLoading = false
                         Toast.makeText(requireContext(), status.message, Toast.LENGTH_LONG).show()
                     }
 
-                    is ApiStatus.Loading -> {
-                        if (!swipeRefresh.isRefreshing) {
-                            swipeRefresh.isRefreshing = true
-                        }
-                    }
+                    is ApiStatus.Loading -> {}
+                }
+            }
+
+            fabNewMovies.setOnClickListener {
+                fabNewMovies.hide()
+                recyclerMovieList.smoothScrollToPosition(0)
+            }
+
+            viewModel.newMovies.observe(viewLifecycleOwner) { new ->
+                if (new) {
+                    fabNewMovies.show()
                 }
             }
         }
@@ -193,10 +166,67 @@ class FragmentMovieList : Fragment() {
                         findNavController().navigate(action)
                         true
                     }
+
                     else -> false
                 }
             }
         }, viewLifecycleOwner, Lifecycle.State.RESUMED)
+
+        binding.searchBar.addMenuProvider(object : MenuProvider {
+            override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
+                menuInflater.inflate(R.menu.search, menu)
+            }
+
+            override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
+                return when (menuItem.itemId) {
+                    R.id.menu_search_sort -> {
+                        sortDialog()
+                        true
+                    }
+
+                    R.id.menu_search_order -> {
+                        orderDialog()
+                        true
+                    }
+
+                    else -> false
+                }
+            }
+        })
+    }
+
+    private fun orderDialog() {
+        val orderEntries = resources.getStringArray(R.array.order_entries)
+        val orderValues = resources.getStringArray(R.array.order_values)
+        val checkedItem = orderValues.indexOf(searchOrder)
+
+        val dialog = AlertDialog.Builder(requireContext())
+        dialog.setTitle("Order by")
+        dialog.setSingleChoiceItems(orderEntries, checkedItem) { v, which ->
+            lifecycleScope.launch(Dispatchers.IO) {
+                utils.updateOrder(orderValues[which])
+            }
+
+            v.dismiss()
+        }
+        dialog.create().show()
+    }
+
+    private fun sortDialog() {
+        val sortEntries = resources.getStringArray(R.array.sort_entries)
+        val sortValues = resources.getStringArray(R.array.sort_values)
+        val checkedItem = sortValues.indexOf(searchSort)
+
+        val dialog = AlertDialog.Builder(requireContext())
+        dialog.setTitle("Sort by")
+        dialog.setSingleChoiceItems(sortEntries, checkedItem) { v, which ->
+            lifecycleScope.launch(Dispatchers.IO) {
+                utils.updateSort(sortValues[which])
+            }
+
+            v.dismiss()
+        }
+        dialog.create().show()
     }
 
     private fun setupSearch() {
@@ -214,7 +244,6 @@ class FragmentMovieList : Fragment() {
             searchView.editText.setOnEditorActionListener { v, actionId, event ->
                 if (v.text.isNotEmpty() && actionId == EditorInfo.IME_ACTION_SEARCH) {
                     val query = v.text.toString().lowercase()
-
                     viewModel.searchMovies(query)
                 }
 
@@ -223,23 +252,19 @@ class FragmentMovieList : Fragment() {
             }
 
             viewModel.moviesSearch.observe(viewLifecycleOwner) {
+                adapter.submitList(null)
                 adapter.submitList(it)
             }
 
             viewModel.statusSearch.observe(viewLifecycleOwner) {
                 when (it) {
-                    is ApiStatus.Done -> {
-                        progressSearch.hide()
-                    }
+                    is ApiStatus.Done -> {}
 
                     is ApiStatus.Error -> {
-                        progressSearch.hide()
                         Toast.makeText(requireContext(), it.message, Toast.LENGTH_LONG).show()
                     }
 
-                    is ApiStatus.Loading -> {
-                        progressSearch.show()
-                    }
+                    is ApiStatus.Loading -> {}
                 }
             }
         }
@@ -251,16 +276,9 @@ class FragmentMovieList : Fragment() {
         requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner) {
             if (binding.searchView.isShowing) {
                 binding.searchView.hide()
-            } else if(layoutManager.findFirstVisibleItemPosition() != 0) {
+            } else if (movies.isNotEmpty() && layoutManager.findFirstVisibleItemPosition() != 0) {
                 binding.recyclerMovieList.scrollToPosition(0)
-            }
-            else {
-                /*val scrollPosition = utils.getScrollPosition(binding.recyclerMovieList)
-
-                lifecycleScope.launch {
-                    utils.updateLastScrollPosition(scrollPosition)
-                }*/
-
+            } else {
                 requireActivity().finish()
             }
         }
