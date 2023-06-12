@@ -14,6 +14,7 @@ import android.view.ViewGroup
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
@@ -48,15 +49,13 @@ class FragmentMovieDetail : Fragment() {
     @Inject
     lateinit var downloader: FileDownloader
 
-    private var url = ""
-    private var torrentUrl = ""
-    private var torrentTitle = ""
+    private var url: String? = null
+    private var torrentUrl: String? = null
+    private var torrentTitle: String? = null
     private lateinit var requestPermissionLauncher: ActivityResultLauncher<String>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        viewModel.refreshMovie(args.movieId)
 
         requestPermissionLauncher =
             registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
@@ -79,94 +78,111 @@ class FragmentMovieDetail : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
-        _binding = null
+        //_binding = null
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        viewModel.refreshMovie(args.movieId)
 
         binding.apply {
             lifecycleOwner = viewLifecycleOwner
             appViewModel = viewModel
 
             viewModel.loadMovie(args.movieId).observe(viewLifecycleOwner) { movie ->
-                this.movie = movie
+                if(movie != null) {
+                    this.movie = movie
 
-                url = movie.url!!
+                    url = movie.url
 
-                val year = movie.year.toString()
-                val language = "[${movie.language?.uppercase()}]"
-                val runtime = "${movie.runtime!! / 60}h ${movie.runtime % 60}m"
-                val span = SpannableString("$year \u2022 $language \u2022 $runtime")
-                txtYear.text = span
+                    val year = movie.year.toString()
+                    val language = "[${movie.language?.uppercase()}]"
+                    val runtime = "${movie.runtime!! / 60}h ${movie.runtime % 60}m"
+                    val span = SpannableString("$year \u2022 $language \u2022 $runtime")
+                    txtYear.text = span
 
-                txtGenre.text = movie.genres?.joinToString(separator = " / ")
-                txtLikeCount.text = utils.shortenNumber(movie.like_count!!, 10)
-                txtDownloadCount.text = utils.shortenNumber(movie.download_count!!, 10)
-                txtImdbRating.text = movie.rating.toString()
+                    txtGenre.text = movie.genres?.joinToString(separator = " / ")
+                    txtLikeCount.text = utils.shortenNumber(movie.like_count!!, 10)
+                    txtDownloadCount.text = utils.shortenNumber(movie.download_count!!, 10)
+                    txtImdbRating.text = movie.rating.toString()
 
-                imgCover.load(movie.medium_cover_image) {
-                    crossfade(true)
-                    error(ColorDrawable(Color.LTGRAY))
-                }
-
-                imgCover.setOnClickListener {
-                    navigateToImageView(movie, 0)
-                }
-
-                txtDescription.setOnClickListener {
-                    if (txtDescription.lineCount > 5) {
-                        txtDescription.maxLines = 5
-                        txtDescription.ellipsize = TextUtils.TruncateAt.END
-                    } else {
-                        txtDescription.maxLines = Integer.MAX_VALUE
-                        txtDescription.ellipsize = null
+                    imgCover.load(movie.medium_cover_image) {
+                        crossfade(true)
+                        error(ColorDrawable(Color.LTGRAY))
                     }
-                }
 
-                val uploaded = "Uploaded: ${movie.date_uploaded}"
-                txtUploadedDate.text = uploaded
-
-                txtImdbRating.setOnClickListener {
-                    if (movie.imdb_code!!.isNotBlank()) {
-                        requireActivity().startActivity(utils.imdbTitle(movie.imdb_code))
-                    } else {
-                        utils.snack(binding.root, "IMDB link not available")
+                    imgCover.setOnClickListener {
+                        navigateToImageView(movie, 0)
                     }
-                }
 
-                txtYoutube.setOnClickListener {
-                    if (movie.yt_trailer_code!!.isNotBlank()) {
-                        requireActivity().startActivity(utils.youtube(movie.yt_trailer_code))
-                    } else {
-                        utils.snack(binding.root, "YouTube link not available")
+                    txtDescription.setOnClickListener {
+                        if (txtDescription.lineCount > 5) {
+                            txtDescription.maxLines = 5
+                            txtDescription.ellipsize = TextUtils.TruncateAt.END
+                        } else {
+                            txtDescription.maxLines = Integer.MAX_VALUE
+                            txtDescription.ellipsize = null
+                        }
                     }
-                }
 
-                btnDownload.setOnClickListener {
-                    downloadDialog(movie)
-                }
+                    val uploaded = "Uploaded: ${movie.date_uploaded}"
+                    txtUploadedDate.text = uploaded
 
-                setupCast(movie)
-                setupTechSpecs(movie)
-                setupScreenshot(movie)
+                    txtImdbRating.setOnClickListener {
+                        if (movie.imdb_code!!.isNotBlank()) {
+                            requireActivity().startActivity(utils.imdbTitle(movie.imdb_code))
+                        } else {
+                            utils.snack(binding.root, "IMDB link not available")
+                        }
+                    }
+
+                    txtYoutube.setOnClickListener {
+                        if (movie.yt_trailer_code!!.isNotBlank()) {
+                            requireActivity().startActivity(utils.youtube(movie.yt_trailer_code))
+                        } else {
+                            utils.snack(binding.root, "YouTube link not available")
+                        }
+                    }
+
+                    btnDownload.setOnClickListener {
+                        downloadDialog(movie)
+                    }
+
+                    setupCast(movie)
+                    setupTechSpecs(movie)
+                    setupScreenshot(movie)
+                }
             }
 
             viewModel.statusMovieDetail.observe(viewLifecycleOwner) {
                 when (it) {
                     is ApiStatus.Done -> {
-                        layoutMovieDetail.visibility = View.VISIBLE
+                        if(!layoutMovieDetail.isVisible) {
+                            layoutMovieDetail.visibility = View.VISIBLE
+                        }
+
+                        if(layoutNoMovie.isVisible) {
+                            layoutNoMovie.visibility = View.GONE
+                        }
+
                         //layoutEmpty.visibility = View.GONE
                     }
 
                     is ApiStatus.Error -> {
-                        layoutMovieDetail.visibility = View.GONE
+                        if(layoutMovieDetail.isVisible) {
+                            layoutMovieDetail.visibility = View.GONE
+                        }
+
+                        if(!layoutNoMovie.isVisible) {
+                            layoutNoMovie.visibility = View.VISIBLE
+                        }
+
                         //layoutEmpty.visibility = View.GONE
-                        utils.snack(binding.root, it.message!!)
                     }
 
                     is ApiStatus.Loading -> {
-                        layoutMovieDetail.visibility = View.GONE
+                        //layoutMovieDetail.visibility = View.GONE
                         //layoutEmpty.visibility = View.VISIBLE
                     }
                 }
@@ -175,7 +191,9 @@ class FragmentMovieDetail : Fragment() {
             toolbar.setOnMenuItemClickListener {
                 when (it.itemId) {
                     R.id.menu_share -> {
-                        requireActivity().startActivity(utils.shareText(url))
+                        if(!url.isNullOrEmpty()) {
+                            requireActivity().startActivity(utils.shareText(url))
+                        }
                         true
                     }
 

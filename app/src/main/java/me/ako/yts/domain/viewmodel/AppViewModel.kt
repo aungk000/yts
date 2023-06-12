@@ -8,6 +8,7 @@ import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.flatMapLatest
@@ -18,6 +19,7 @@ import me.ako.yts.data.network.MovieApiService
 import me.ako.yts.data.network.model.MovieList
 import me.ako.yts.data.network.model.MovieSuggestion
 import me.ako.yts.domain.controller.DataRepository
+import me.ako.yts.domain.util.Base
 import me.ako.yts.domain.util.Utils
 import javax.inject.Inject
 
@@ -37,15 +39,28 @@ class AppViewModel @Inject constructor(
     private val _movies = MutableLiveData<List<MovieEntity>>()
     private val _statusSearch = MutableLiveData<ApiStatus>()
     private val _moviesSearch = MutableLiveData<List<MovieList>?>()
+    @OptIn(ExperimentalCoroutinesApi::class)
     private val _moviesFlow = offset.flatMapLatest {
         repository.loadMovies(limit.value, it)
     }
-    private val _statusMovieDetail = MutableLiveData<ApiStatus>()
+    private val _statusMovieDetailNetwork = MutableLiveData<ApiStatus>()
+    private val _statusMovieDetailDatabase = MutableLiveData<ApiStatus>()
     private val _statusMovieSuggestions = MutableLiveData<ApiStatus>()
     private val _newMovies = MutableLiveData(false)
 
     val statusMovieSuggestions: LiveData<ApiStatus> = _statusMovieSuggestions
-    val statusMovieDetail: LiveData<ApiStatus> = _statusMovieDetail
+    val statusMovieDetail = Base.CombineLiveData<ApiStatus, ApiStatus, ApiStatus>(
+        _statusMovieDetailNetwork,
+        _statusMovieDetailDatabase
+    ) { network, database ->
+        if(network is ApiStatus.Done || database is ApiStatus.Done) {
+            ApiStatus.Done("")
+        } else if (network is ApiStatus.Error && database is ApiStatus.Error) {
+            ApiStatus.Error(network.message)
+        } else {
+            ApiStatus.Loading("")
+        }
+    }
     val statusMovies: LiveData<ApiStatus> = _statusMovies
     val movies: LiveData<List<MovieEntity>> = _movies
     val statusSearch: LiveData<ApiStatus> = _statusSearch
@@ -107,42 +122,54 @@ class AppViewModel @Inject constructor(
                     }
                 }
             } catch (e: Exception) {
-                Log.e("AppViewModel", "loadMovies: ${e.localizedMessage}")
+                Log.e("AppViewModel", "loadMovies: ${e.message}")
             }
         }
     }
 
     fun refreshMovie(id: Int) {
+        _statusMovieDetailNetwork.value = ApiStatus.Loading("Loading movie detail")
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 repository.refreshMovie(id)
+                _statusMovieDetailNetwork.postValue(ApiStatus.Done("Finished loading movie detail"))
             } catch (e: Exception) {
-                Log.d("AppViewModel", "refreshMovies: ${e.message}")
+                Log.d("AppViewModel", "refreshMovie: ${e.message}")
+                _statusMovieDetailNetwork.postValue(ApiStatus.Error(e.message))
             }
         }
     }
 
-    fun loadMovie(movie_id: Int): LiveData<MovieEntity> {
+    fun loadMovie(movie_id: Int): LiveData<MovieEntity?> {
         val movie = MutableLiveData<MovieEntity>()
-
-        _statusMovieDetail.value = ApiStatus.Loading(null)
+        _statusMovieDetailDatabase.value = ApiStatus.Loading("Loading movie detail")
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 repository.loadMovie(movie_id).collectLatest {
-                    movie.postValue(it)
-                    _statusMovieDetail.postValue(ApiStatus.Done(null))
+                    if (it != null) {
+                        movie.postValue(it)
+                        _statusMovieDetailDatabase.postValue(ApiStatus.Done("Finished loading movie detail"))
+                    } else {
+                        _statusMovieDetailDatabase.postValue(ApiStatus.Error("Error no movie found"))
+                    }
                 }
             } catch (e: Exception) {
-                Log.e("AppViewModel", "loadMovie: ${e.message}")
-                _statusMovieDetail.postValue(ApiStatus.Error(e.message))
+                Log.d("AppViewModel", "loadMovie: ${e.message}")
+                _statusMovieDetailDatabase.postValue(ApiStatus.Error(e.message))
             }
         }
-
         return movie
     }
 
     fun setNewMovies(isNew: Boolean) {
         _newMovies.value = isNew
+    }
+
+    fun clearMovies() {
+        movieSet.clear()
+        _movies.value = listOf()
+        page.value = 1
+        offset.value = 0
     }
 
     private fun filterNewMovies(list: List<MovieEntity>) {

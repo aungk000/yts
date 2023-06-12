@@ -13,6 +13,11 @@
             app:iconSpaceReserved="false"
             app:title="@string/theme"/>
 
+        <Preference
+            app:key="clear"
+            app:title="Clear data"
+            app:iconSpaceReserved="false"/>
+
     </PreferenceCategory>
 
 </PreferenceScreen>

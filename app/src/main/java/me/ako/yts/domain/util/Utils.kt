@@ -19,6 +19,8 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import me.ako.yts.data.network.model.Api
+import java.io.File
+import java.io.IOException
 import kotlin.math.ceil
 
 class Utils(private val context: Context) {
@@ -90,6 +92,38 @@ class Utils(private val context: Context) {
             }
         }
     }
+
+    fun deleteCache() {
+        Log.d("Utils", "cacheDir: ${context.cacheDir.absolutePath}")
+        context.cacheDir.deleteRecursively()
+    }
+
+    /*fun deleteCache(): Boolean {
+        return try {
+            val dir = context.cacheDir
+            deleteDir(dir)
+            true
+        } catch (e: IOException) {
+            Log.e("Utils", "deleteCache: ${e.message}")
+            false
+        }
+    }
+
+    private fun deleteDir(dir: File?): Boolean {
+        return if(dir != null && dir.isDirectory) {
+            val children = dir.list()
+            if(children != null) {
+                for(i in 0..children.size) {
+                    deleteDir(File(dir, children[i]))
+                }
+            }
+            dir.delete()
+        } else if(dir != null && dir.isFile) {
+            dir.delete()
+        } else {
+            false
+        }
+    }*/
 
     fun shortenNumber(count: Long, decimal: Int): String {
         val short = if (count in 1000..999999) {

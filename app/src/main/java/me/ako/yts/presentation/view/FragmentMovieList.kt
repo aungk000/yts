@@ -60,6 +60,8 @@ class FragmentMovieList : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        //viewModel.refreshMovies(1)
+
         handleBackPressed()
         setupSearch()
 
@@ -123,7 +125,7 @@ class FragmentMovieList : Fragment() {
 
                     is ApiStatus.Error -> {
                         isLoading = false
-                        Toast.makeText(requireContext(), status.message, Toast.LENGTH_LONG).show()
+                        //Toast.makeText(requireContext(), status.message, Toast.LENGTH_LONG).show()
                     }
 
                     is ApiStatus.Loading -> {}

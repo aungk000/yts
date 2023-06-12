@@ -1,5 +1,7 @@
 package me.ako.yts.presentation.presenter
 
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.AsyncDifferConfig
@@ -33,7 +35,7 @@ class SearchAdapter(private val onClicked: (MovieList) -> Unit) :
                 this.movie = movie
                 imgCover.load(movie.medium_cover_image) {
                     crossfade(true)
-                    error(R.drawable.no_poster)
+                    error(ColorDrawable(Color.LTGRAY))
                 }
                 executePendingBindings()
             }

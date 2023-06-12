@@ -7,24 +7,27 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface MovieDao {
     @Query("SELECT * FROM movie ORDER BY id DESC LIMIT :limit OFFSET :offset")
-    fun getMovies(limit: Int?, offset: Int?): Flow<List<MovieEntity>>
+    fun getMoviesFlow(limit: Int?, offset: Int?): Flow<List<MovieEntity>>
 
     @Query("SELECT * FROM movie ORDER BY id DESC")
-    fun getMovies(): Flow<List<MovieEntity>>
+    fun getMoviesFlow(): Flow<List<MovieEntity>>
 
     @Query("SELECT * FROM movie WHERE id = :id")
-    fun getMovie(id: Int): Flow<MovieEntity>
+    fun getMovieFlow(id: Int): Flow<MovieEntity?>
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    @Query("SELECT * FROM movie WHERE id = :id")
+    fun getMovie(id: Int): MovieEntity?
+
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertAll(vararg movies: MovieEntity)
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertMovies(movies: List<MovieEntity>)
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertMovie(movie: MovieEntity)
 
-    @Update
+    @Update(onConflict = OnConflictStrategy.REPLACE)
     suspend fun updateMovie(movie: MovieEntity)
 
     @Delete
@@ -32,4 +35,7 @@ interface MovieDao {
 
     @Query("DELETE FROM movie WHERE id = :id")
     suspend fun deleteMovie(id: Int)
+
+    @Query("DELETE FROM movie")
+    suspend fun deleteAll()
 }

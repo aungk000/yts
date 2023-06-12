@@ -3,6 +3,7 @@ package me.ako.yts.presentation.presenter
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.core.view.isInvisible
@@ -25,7 +26,6 @@ class ImageViewAdapter(private val list: Array<String>) :
                 this.url = url
                 zoomImg.load(url) {
                     crossfade(true)
-                    error(ColorDrawable(Color.LTGRAY))
                     listener(
                         onStart = {
                             progressImageView.show()
@@ -44,8 +44,7 @@ class ImageViewAdapter(private val list: Array<String>) :
                             if(progressImageView.isVisible) {
                                 progressImageView.hide()
                             }
-                            Snackbar.make(binding.root, "Error loading image", Snackbar.LENGTH_LONG)
-                                .show()
+                            txtErrorImage.visibility = View.VISIBLE
                         }
                     )
                 }

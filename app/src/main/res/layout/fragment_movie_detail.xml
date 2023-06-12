@@ -33,15 +33,15 @@
         </com.google.android.material.appbar.AppBarLayout>
 
         <androidx.core.widget.NestedScrollView
+            android:id="@+id/layout_movie_detail"
+            android:visibility="gone"
+            tools:visibility="visible"
             android:scrollbars="none"
             app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
             <androidx.constraintlayout.widget.ConstraintLayout
-                android:id="@+id/layout_movie_detail"
-                android:visibility="gone"
-                tools:visibility="visible"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
 
@@ -300,6 +300,38 @@
             </androidx.constraintlayout.widget.ConstraintLayout>
 
         </androidx.core.widget.NestedScrollView>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/layout_no_movie"
+            android:visibility="gone"
+            tools:visibility="gone"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <ImageView
+                android:id="@+id/img_no_movie"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                android:scaleType="fitCenter"
+                android:src="@drawable/no_movie_found"
+                android:layout_width="150dp"
+                android:layout_height="150dp"
+                android:contentDescription="@string/no_movie_found" />
+
+            <com.google.android.material.textview.MaterialTextView
+                android:layout_margin="@dimen/dimen_normal"
+                android:textStyle="bold"
+                android:textSize="@dimen/text_size_large"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/img_no_movie"
+                android:text="@string/no_movie_found"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
         <com.google.android.material.progressindicator.CircularProgressIndicator
             android:id="@+id/progress_movie_detail"

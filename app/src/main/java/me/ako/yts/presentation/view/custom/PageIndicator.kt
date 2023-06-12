@@ -14,7 +14,7 @@ import me.ako.yts.R
 class PageIndicator : LinearLayout {
 
     private var childViewsCount = 0
-    private lateinit var childViews: Array<ImageView?>
+    private var childViews: Array<ImageView?>? = null
     var iconActive: Drawable? = null
     var iconInactive: Drawable? = null
     private var viewPager2: ViewPager2? = null
@@ -67,17 +67,17 @@ class PageIndicator : LinearLayout {
     private fun setChildViews(count: Int) {
         childViews = arrayOfNulls(count)
         for (i in 0 until count) {
-            childViews[i] = ImageView(context)
+            childViews!![i] = ImageView(context)
             if (i == 0) {
-                childViews[i]!!.setImageDrawable(iconActive)
+                childViews!![i]!!.setImageDrawable(iconActive)
             } else {
-                childViews[i]!!.setImageDrawable(iconInactive)
+                childViews!![i]!!.setImageDrawable(iconInactive)
             }
             val params = LayoutParams(
                 LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT
             )
             params.setMargins(10, 0, 10, 0)
-            addView(childViews[i], params)
+            addView(childViews!![i], params)
         }
     }
 
@@ -86,7 +86,9 @@ class PageIndicator : LinearLayout {
 
         if (viewPager2.adapter != null) {
             childViewsCount = viewPager2.adapter!!.itemCount
-            setChildViews(childViewsCount)
+            if(childViews.isNullOrEmpty()) {
+                setChildViews(childViewsCount)
+            }
         }
 
         viewPager2.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
@@ -99,9 +101,9 @@ class PageIndicator : LinearLayout {
     private fun selectIndicator(position: Int) {
         for (i in 0 until childViewsCount) {
             if (i == position) {
-                childViews[i]!!.setImageDrawable(iconActive)
+                childViews?.get(i)?.setImageDrawable(iconActive)
             } else {
-                childViews[i]!!.setImageDrawable(iconInactive)
+                childViews?.get(i)?.setImageDrawable(iconInactive)
             }
         }
     }

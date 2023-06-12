@@ -72,7 +72,7 @@ class FragmentImageView : Fragment() {
 
         requireActivity().apply {
             window.navigationBarColor = Color.TRANSPARENT
-            window.statusBarColor = Color.TRANSPARENT
+            //window.statusBarColor = Color.TRANSPARENT
 
             WindowCompat.setDecorFitsSystemWindows(window, false)
             WindowCompat.getInsetsController(window, window.decorView).apply {
@@ -175,7 +175,7 @@ class FragmentImageView : Fragment() {
 
         requireActivity().apply {
             window.navigationBarColor = android.R.attr.colorBackground
-            window.statusBarColor = android.R.attr.colorBackground
+            //window.statusBarColor = android.R.attr.colorBackground
 
             WindowCompat.setDecorFitsSystemWindows(window, true)
             WindowInsetsControllerCompat(window, window.decorView).apply {
