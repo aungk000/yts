@@ -6,6 +6,9 @@ import androidx.recyclerview.widget.AsyncDifferConfig
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import coil.load
+import coil.transform.RoundedCornersTransformation
+import me.ako.yts.R
 import me.ako.yts.data.network.model.MovieList
 import me.ako.yts.databinding.ItemSearchBinding
 
@@ -28,7 +31,10 @@ class SearchAdapter(private val onClicked: (MovieList) -> Unit) :
         fun onBind(movie: MovieList) {
             binding.apply {
                 this.movie = movie
-                txtYear.text = movie.year.toString()
+                imgCover.load(movie.medium_cover_image) {
+                    crossfade(true)
+                    error(R.drawable.no_poster)
+                }
                 executePendingBindings()
             }
         }

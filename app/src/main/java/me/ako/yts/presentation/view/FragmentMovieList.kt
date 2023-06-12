@@ -2,32 +2,26 @@ package me.ako.yts.presentation.view
 
 import android.os.Bundle
 import android.view.LayoutInflater
-import android.view.Menu
-import android.view.MenuInflater
-import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import android.widget.Toast
 import androidx.activity.addCallback
-import androidx.appcompat.app.AlertDialog
-import androidx.core.view.MenuProvider
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.OnScrollListener
-import com.google.android.material.appbar.MaterialToolbar
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import me.ako.yts.R
 import me.ako.yts.data.datasource.model.MovieEntity
-import me.ako.yts.data.network.MovieApi.ApiStatus
+import me.ako.yts.data.network.ApiStatus
 import me.ako.yts.data.network.model.Api
 import me.ako.yts.databinding.FragmentMovieListBinding
 import me.ako.yts.domain.util.Utils
@@ -45,9 +39,10 @@ class FragmentMovieList : Fragment() {
 
     @Inject
     lateinit var utils: Utils
+
     private var isLoading = false
     private var movies = listOf<MovieEntity>()
-    private var searchSort = Api.Endpoint.Parameter.Sort.Title.type
+    private var searchSort = Api.Endpoint.Parameter.Sort.DownloadCount.type
     private var searchOrder = Api.Endpoint.Parameter.Order.Desc.type
 
     override fun onCreateView(
@@ -67,7 +62,6 @@ class FragmentMovieList : Fragment() {
 
         handleBackPressed()
         setupSearch()
-        addMenuProvider()
 
         viewModel.sort.observe(viewLifecycleOwner) {
             searchSort = it
@@ -82,12 +76,12 @@ class FragmentMovieList : Fragment() {
             appViewModel = viewModel
 
             val adapter = MovieAdapter {
-                val action =
+                findNavController().navigate(
                     FragmentMovieListDirections.actionFragmentMovieListToFragmentMovieDetail(
                         it.id,
                         it.title
                     )
-                findNavController().navigate(action)
+                )
             }
 
             recyclerMovieList.adapter = adapter
@@ -105,7 +99,8 @@ class FragmentMovieList : Fragment() {
 
                     if (!isLoading &&
                         fabNewMovies.isVisible &&
-                        layoutManager.findFirstCompletelyVisibleItemPosition() == 0) {
+                        layoutManager.findFirstCompletelyVisibleItemPosition() == 0
+                    ) {
                         fabNewMovies.hide()
                     }
                 }
@@ -124,9 +119,6 @@ class FragmentMovieList : Fragment() {
                 when (status) {
                     is ApiStatus.Done -> {
                         isLoading = false
-                        status.message?.let { message ->
-                            Toast.makeText(requireContext(), message, Toast.LENGTH_LONG).show()
-                        }
                     }
 
                     is ApiStatus.Error -> {
@@ -139,117 +131,75 @@ class FragmentMovieList : Fragment() {
             }
 
             fabNewMovies.setOnClickListener {
-                fabNewMovies.hide()
+                viewModel.setNewMovies(false)
                 recyclerMovieList.smoothScrollToPosition(0)
             }
 
-            viewModel.newMovies.observe(viewLifecycleOwner) { new ->
-                if (new) {
+            viewModel.newMovies.observe(viewLifecycleOwner) { isNew ->
+                if (isNew) {
                     fabNewMovies.show()
+                } else {
+                    fabNewMovies.hide()
                 }
             }
         }
-    }
-
-    private fun addMenuProvider() {
-        val toolbar: MaterialToolbar = requireActivity().findViewById(R.id.toolbar)
-        toolbar.addMenuProvider(object : MenuProvider {
-            override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
-                menuInflater.inflate(R.menu.main, menu)
-            }
-
-            override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
-                return when (menuItem.itemId) {
-                    R.id.menu_settings -> {
-                        val action =
-                            FragmentMovieListDirections.actionFragmentMovieListToSettingsFragment()
-                        findNavController().navigate(action)
-                        true
-                    }
-
-                    else -> false
-                }
-            }
-        }, viewLifecycleOwner, Lifecycle.State.RESUMED)
-
-        binding.searchBar.addMenuProvider(object : MenuProvider {
-            override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
-                menuInflater.inflate(R.menu.search, menu)
-            }
-
-            override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
-                return when (menuItem.itemId) {
-                    R.id.menu_search_sort -> {
-                        sortDialog()
-                        true
-                    }
-
-                    R.id.menu_search_order -> {
-                        orderDialog()
-                        true
-                    }
-
-                    else -> false
-                }
-            }
-        })
-    }
-
-    private fun orderDialog() {
-        val orderEntries = resources.getStringArray(R.array.order_entries)
-        val orderValues = resources.getStringArray(R.array.order_values)
-        val checkedItem = orderValues.indexOf(searchOrder)
-
-        val dialog = AlertDialog.Builder(requireContext())
-        dialog.setTitle("Order by")
-        dialog.setSingleChoiceItems(orderEntries, checkedItem) { v, which ->
-            lifecycleScope.launch(Dispatchers.IO) {
-                utils.updateOrder(orderValues[which])
-            }
-
-            v.dismiss()
-        }
-        dialog.create().show()
-    }
-
-    private fun sortDialog() {
-        val sortEntries = resources.getStringArray(R.array.sort_entries)
-        val sortValues = resources.getStringArray(R.array.sort_values)
-        val checkedItem = sortValues.indexOf(searchSort)
-
-        val dialog = AlertDialog.Builder(requireContext())
-        dialog.setTitle("Sort by")
-        dialog.setSingleChoiceItems(sortEntries, checkedItem) { v, which ->
-            lifecycleScope.launch(Dispatchers.IO) {
-                utils.updateSort(sortValues[which])
-            }
-
-            v.dismiss()
-        }
-        dialog.create().show()
     }
 
     private fun setupSearch() {
-        val adapter = SearchAdapter {
-            val action = FragmentMovieListDirections.actionFragmentMovieListToFragmentMovieDetail(
-                it.id, it.title
-            )
-            findNavController().navigate(action)
-        }
-
         binding.apply {
-            searchView.setupWithSearchBar(searchBar)
-            recyclerSearch.adapter = adapter
+            searchView.apply {
+                setupWithSearchBar(searchBar)
 
-            searchView.editText.setOnEditorActionListener { v, actionId, event ->
-                if (v.text.isNotEmpty() && actionId == EditorInfo.IME_ACTION_SEARCH) {
-                    val query = v.text.toString().lowercase()
-                    viewModel.searchMovies(query)
+                editText.setOnEditorActionListener { v, actionId, event ->
+                    if (v.text.isNotEmpty() && actionId == EditorInfo.IME_ACTION_SEARCH) {
+                        searchBar.text = searchView.text
+                        val query = v.text.toString().lowercase()
+                        viewModel.searchMovies(query)
+                    }
+
+                    searchView.clearFocusAndHideKeyboard()
+                    true
                 }
 
-                searchView.clearFocusAndHideKeyboard()
-                true
+                inflateMenu(R.menu.menu_search)
+                setOnMenuItemClickListener {
+                    when (it.itemId) {
+                        R.id.menu_search_sort -> {
+                            sortDialog()
+                            true
+                        }
+
+                        R.id.menu_search_order -> {
+                            orderDialog()
+                            true
+                        }
+
+                        else -> false
+                    }
+                }
             }
+
+            searchBar.setOnMenuItemClickListener {
+                when (it.itemId) {
+                    R.id.menu_settings -> {
+                        findNavController().navigate(
+                            FragmentMovieListDirections.actionFragmentMovieListToFragmentSettings()
+                        )
+                        true
+                    }
+
+                    else -> false
+                }
+            }
+
+            val adapter = SearchAdapter {
+                findNavController().navigate(
+                    FragmentMovieListDirections.actionFragmentMovieListToFragmentMovieDetail(
+                        it.id, it.title
+                    )
+                )
+            }
+            recyclerSearch.adapter = adapter
 
             viewModel.moviesSearch.observe(viewLifecycleOwner) {
                 adapter.submitList(null)
@@ -261,13 +211,49 @@ class FragmentMovieList : Fragment() {
                     is ApiStatus.Done -> {}
 
                     is ApiStatus.Error -> {
-                        Toast.makeText(requireContext(), it.message, Toast.LENGTH_LONG).show()
+                        if (searchView.isShowing) {
+                            Toast.makeText(requireContext(), it.message, Toast.LENGTH_LONG).show()
+                        }
                     }
 
                     is ApiStatus.Loading -> {}
                 }
             }
         }
+    }
+
+    private fun sortDialog() {
+        val sortEntries = resources.getStringArray(R.array.sort_entries)
+        val sortValues = resources.getStringArray(R.array.sort_values)
+        val checkedItem = sortValues.indexOf(searchSort)
+
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle("Sort by")
+            .setSingleChoiceItems(sortEntries, checkedItem) { v, which ->
+                lifecycleScope.launch(Dispatchers.IO) {
+                    utils.updateSort(sortValues[which])
+                }
+
+                v.dismiss()
+            }
+            .show()
+    }
+
+    private fun orderDialog() {
+        val orderEntries = resources.getStringArray(R.array.order_entries)
+        val orderValues = resources.getStringArray(R.array.order_values)
+        val checkedItem = orderValues.indexOf(searchOrder)
+
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle("Order by")
+            .setSingleChoiceItems(orderEntries, checkedItem) { v, which ->
+                lifecycleScope.launch(Dispatchers.IO) {
+                    utils.updateOrder(orderValues[which])
+                }
+
+                v.dismiss()
+            }
+            .show()
     }
 
     private fun handleBackPressed() {

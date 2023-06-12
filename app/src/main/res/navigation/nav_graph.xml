@@ -14,8 +14,8 @@
             android:id="@+id/action_fragmentMovieList_to_fragmentMovieDetail"
             app:destination="@id/fragmentMovieDetail" />
         <action
-            android:id="@+id/action_fragmentMovieList_to_settingsFragment"
-            app:destination="@id/settingsFragment" />
+            android:id="@+id/action_fragmentMovieList_to_fragmentSettings"
+            app:destination="@id/fragmentSettings" />
     </fragment>
     <fragment
         android:id="@+id/fragmentMovieDetail"
@@ -30,22 +30,29 @@
             app:argType="string"
             app:nullable="true"
             android:defaultValue="Movie detail"/>
-        <!--<action
-            android:id="@+id/action_fragmentMovieDetail_to_fragmentMovieList"
-            app:destination="@id/fragmentMovieList"
-            app:popUpTo="@id/fragmentMovieList"
-            app:popUpToInclusive="true"/>-->
-        <!--<action
-            android:id="@+id/action_fragmentMovieDetail_self"
-            app:destination="@id/fragmentMovieDetail"
-            app:popUpTo="@id/fragmentMovieDetail"
-            app:popUpToInclusive="true"/>-->
         <action
             android:id="@+id/action_fragmentMovieDetail_self"
             app:destination="@id/fragmentMovieDetail" />
+        <action
+            android:id="@+id/action_fragmentMovieDetail_to_fragmentImageView"
+            app:destination="@id/fragmentImageView" />
     </fragment>
     <fragment
-        android:id="@+id/settingsFragment"
-        android:name="me.ako.yts.presentation.view.SettingsFragment"
-        android:label="@string/settings"/>
+        android:id="@+id/fragmentImageView"
+        android:name="me.ako.yts.presentation.view.FragmentImageView"
+        android:label="FragmentImageView"
+        tools:layout="@layout/fragment_image_view">
+        <argument
+            android:name="current"
+            app:argType="integer"
+            android:defaultValue="0" />
+        <argument
+            android:name="urls"
+            app:argType="string[]" />
+    </fragment>
+    <fragment
+        android:id="@+id/fragmentSettings"
+        android:name="me.ako.yts.presentation.view.FragmentSettings"
+        android:label="FragmentSettings"
+        tools:layout="@layout/fragment_settings"/>
 </navigation>

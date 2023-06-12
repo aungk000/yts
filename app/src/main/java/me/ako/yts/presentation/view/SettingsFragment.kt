@@ -12,19 +12,25 @@ import javax.inject.Inject
 
 @AndroidEntryPoint
 class SettingsFragment : PreferenceFragmentCompat(), OnPreferenceChangeListener {
-    @Inject lateinit var utils: Utils
+    @Inject
+    lateinit var utils: Utils
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         setPreferencesFromResource(R.xml.root_preferences, rootKey)
         findPreference<ListPreference>("theme")?.onPreferenceChangeListener = this
     }
 
+    override fun onDisplayPreferenceDialog(preference: Preference) {
+        super.onDisplayPreferenceDialog(preference)
+    }
+
     override fun onPreferenceChange(preference: Preference, newValue: Any?): Boolean {
-        return when(preference.key) {
+        return when (preference.key) {
             "theme" -> {
                 utils.setTheme(newValue as String)
                 true
             }
+
             else -> false
         }
     }

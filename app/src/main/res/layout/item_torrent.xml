@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <data>
+        <variable
+            name="torrent"
+            type="me.ako.yts.data.network.model.Torrent" />
+    </data>
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:weightSum="2"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:baselineAligned="false">
+
+        <LinearLayout
+            android:padding="@dimen/dimen_normal"
+            android:orientation="vertical"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content">
+
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/txt_torrent_size"
+                android:text="@{torrent.size}"
+                android:padding="@dimen/dimen_normal"
+                app:drawableStartCompat="@drawable/ic_folder"
+                android:drawablePadding="@dimen/dimen_normal"
+                tools:text="2.30 GB"
+                android:textSize="@dimen/text_size_normal"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+
+            <View
+                android:background="@color/grey"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"/>
+
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/txt_torrent_quality"
+                android:text="@{torrent.quality}"
+                android:padding="@dimen/dimen_normal"
+                app:drawableStartCompat="@drawable/ic_quality"
+                android:drawablePadding="@dimen/dimen_normal"
+                tools:text="1080p"
+                android:textSize="@dimen/text_size_normal"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+
+            <View
+                android:background="@color/grey"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"/>
+
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/txt_torrent_peers"
+                android:padding="@dimen/dimen_normal"
+                tools:text="Peers: 2"
+                android:textSize="@dimen/text_size_normal"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:padding="@dimen/dimen_normal"
+            android:orientation="vertical"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content">
+
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/txt_torrent_date"
+                android:text="@{torrent.date_uploaded}"
+                android:padding="@dimen/dimen_normal"
+                android:ellipsize="end"
+                android:maxLines="1"
+                tools:text="2023-05-30 09:33:11"
+                android:textSize="@dimen/text_size_normal"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+
+            <View
+                android:background="@color/grey"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"/>
+
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/txt_torrent_type"
+                android:padding="@dimen/dimen_normal"
+                app:drawableStartCompat="@drawable/ic_movie_type"
+                android:drawablePadding="@dimen/dimen_normal"
+                tools:text="Web"
+                android:textSize="@dimen/text_size_normal"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+
+            <View
+                android:background="@color/grey"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"/>
+
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/txt_torrent_seeds"
+                android:padding="@dimen/dimen_normal"
+                tools:text="Seeds: 4"
+                android:textSize="@dimen/text_size_normal"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</layout>

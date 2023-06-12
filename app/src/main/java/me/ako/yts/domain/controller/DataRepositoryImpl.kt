@@ -16,13 +16,20 @@ class DataRepositoryImpl(private val dao: MovieDao, private val retrofit: MovieA
     override fun loadMovies(limit: Int?, offset: Int?): Flow<List<MovieEntity>> {
         return dao.getMovies(limit, offset)
     }
-
     override fun loadMovies(): Flow<List<MovieEntity>> {
         return dao.getMovies()
     }
 
     override fun loadMovie(id: Int): Flow<MovieEntity> {
         return dao.getMovie(id)
+    }
+
+    override suspend fun deleteMovies(vararg movies: MovieEntity) {
+        dao.deleteMovies(*movies)
+    }
+
+    override suspend fun deleteMovie(id: Int) {
+        dao.deleteMovie(id)
     }
 
     override suspend fun refreshMovies(limit: Int, page: Int) {
@@ -34,7 +41,21 @@ class DataRepositoryImpl(private val dao: MovieDao, private val retrofit: MovieA
                     }
                 }
             } catch (e: Exception) {
-                Log.d("DataRepositoryImpl", "refreshMovies: ${e.localizedMessage}")
+                Log.d("DataRepositoryImpl", "refreshMovies: ${e.message}")
+            }
+        }
+    }
+
+    override suspend fun refreshMovie(id: Int) {
+        withContext(Dispatchers.IO) {
+            try {
+                retrofit.getMovie(id).body()?.let { response ->
+                    response.asDatabaseModel().let { movie ->
+                        dao.updateMovie(movie)
+                    }
+                }
+            } catch (e: Exception) {
+                Log.d("DataRepositoryImpl", "refreshMovie: ${e.message}")
             }
         }
     }

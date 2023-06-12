@@ -2,7 +2,6 @@ package me.ako.yts.data.network
 
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
-import me.ako.yts.data.network.model.Api
 import me.ako.yts.data.network.model.MovieDetailResponse
 import me.ako.yts.data.network.model.MovieListResponse
 import me.ako.yts.data.network.model.MovieSuggestionResponse
@@ -13,6 +12,7 @@ import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
 import retrofit2.http.GET
 import retrofit2.http.Query
+import java.lang.reflect.Type
 import java.util.concurrent.TimeUnit
 
 interface MovieApiService {
@@ -64,9 +64,28 @@ object MovieApi {
         retrofit.create(MovieApiService::class.java)
     }
 
-    sealed class ApiStatus(val message: String?) {
-        class Loading(message: String?) : ApiStatus(message)
-        class Error(message: String?) : ApiStatus(message)
-        class Done(message: String?) : ApiStatus(message)
+    val moshiParser: MoshiParser by lazy {
+        MoshiParser(moshi)
     }
+}
+
+class MoshiParser(private val moshi: Moshi): JsonParser {
+    override fun <T> fromJson(json: String, type: Type): T? {
+        return moshi.adapter<T>(type).fromJson(json)
+    }
+
+    override fun <T> toJson(obj: T, type: Type): String? {
+        return moshi.adapter<T>(type).toJson(obj)
+    }
+}
+
+interface JsonParser {
+    fun <T> fromJson(json: String, type: Type): T?
+    fun <T> toJson(obj: T, type: Type): String?
+}
+
+sealed class ApiStatus(val message: String?) {
+    class Loading(message: String?) : ApiStatus(message)
+    class Error(message: String?) : ApiStatus(message)
+    class Done(message: String?) : ApiStatus(message)
 }

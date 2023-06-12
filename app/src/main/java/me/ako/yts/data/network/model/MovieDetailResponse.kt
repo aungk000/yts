@@ -53,7 +53,7 @@ data class MovieDetail(
 @JsonClass(generateAdapter = true)
 data class Cast(
     val name: String = "",
-    val character_name: String = "",
+    val character_name: String = "Unknown",
     val url_small_image: String = "",
     val imdb_code: String = ""
 )
@@ -71,3 +71,43 @@ data class Torrent(
     val date_uploaded: String = "",
     val date_uploaded_unix: Long = 0,
 )
+
+fun MovieDetailResponse.asDatabaseModel(): MovieEntity {
+    return data.movie.let {
+        MovieEntity(
+            id = it.id,
+            url = it.url,
+            imdb_code = it.imdb_code,
+            title = it.title,
+            title_english = it.title_english,
+            title_long = it.title_long,
+            slug = it.slug,
+            year = it.year,
+            rating = it.rating,
+            runtime = it.runtime,
+            genres = it.genres,
+            description_full = it.description_full,
+            yt_trailer_code = it.yt_trailer_code,
+            language = it.language,
+            mpa_rating = it.mpa_rating,
+            background_image = it.background_image,
+            background_image_original = it.background_image_original,
+            small_cover_image = it.small_cover_image,
+            medium_cover_image = it.medium_cover_image,
+            large_cover_image = it.large_cover_image,
+            torrents = it.torrents,
+            date_uploaded = it.date_uploaded,
+            date_uploaded_unix = it.date_uploaded_unix,
+            download_count = it.download_count,
+            like_count = it.like_count,
+            medium_screenshot_image1 = it.medium_screenshot_image1,
+            medium_screenshot_image2 = it.medium_screenshot_image2,
+            medium_screenshot_image3 = it.medium_screenshot_image3,
+            large_screenshot_image1 = it.large_screenshot_image1,
+            large_screenshot_image2 = it.large_screenshot_image2,
+            large_screenshot_image3 = it.large_screenshot_image3,
+            cast = it.cast,
+            description_intro = it.description_intro
+        )
+    }
+}

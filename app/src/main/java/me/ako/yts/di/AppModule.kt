@@ -14,6 +14,7 @@ import me.ako.yts.data.network.MovieApi
 import me.ako.yts.data.network.MovieApiService
 import me.ako.yts.domain.controller.DataRepository
 import me.ako.yts.domain.controller.DataRepositoryImpl
+import me.ako.yts.domain.util.FileDownloader
 import me.ako.yts.domain.util.Utils
 import javax.inject.Singleton
 
@@ -49,5 +50,11 @@ object AppModule {
     @Provides
     fun provideRetrofit(): MovieApiService {
         return MovieApi.retrofitService
+    }
+
+    @Singleton
+    @Provides
+    fun provideDownloader(@ApplicationContext context: Context): FileDownloader {
+        return FileDownloader(context)
     }
 }

@@ -1,5 +1,7 @@
 package me.ako.yts.presentation.presenter
 
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.AsyncDifferConfig
@@ -7,6 +9,7 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import coil.load
+import coil.transform.RoundedCornersTransformation
 import me.ako.yts.R
 import me.ako.yts.data.network.model.MovieSuggestion
 import me.ako.yts.databinding.ItemMovieSuggestionBinding
@@ -19,7 +22,6 @@ class MovieSuggestionAdapter(private val onClicked: (MovieSuggestion) -> Unit) :
         override fun areItemsTheSame(oldItem: MovieSuggestion, newItem: MovieSuggestion): Boolean {
             return oldItem.id == newItem.id
         }
-
         override fun areContentsTheSame(oldItem: MovieSuggestion, newItem: MovieSuggestion): Boolean {
             return oldItem == newItem
         }
@@ -31,9 +33,10 @@ class MovieSuggestionAdapter(private val onClicked: (MovieSuggestion) -> Unit) :
             binding.apply {
                 this.movie = movie
                 imgCover.load(movie.medium_cover_image) {
-                    error(R.drawable.no_poster)
+                    crossfade(true)
+                    error(ColorDrawable(Color.LTGRAY))
                 }
-                txtYear.text = movie.year?.toString()
+
                 executePendingBindings()
             }
         }

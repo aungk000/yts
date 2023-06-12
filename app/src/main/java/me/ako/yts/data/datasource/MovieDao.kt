@@ -16,7 +16,7 @@ interface MovieDao {
     fun getMovie(id: Int): Flow<MovieEntity>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertAll(vararg movie: MovieEntity)
+    suspend fun insertAll(vararg movies: MovieEntity)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertMovies(movies: List<MovieEntity>)
@@ -28,5 +28,8 @@ interface MovieDao {
     suspend fun updateMovie(movie: MovieEntity)
 
     @Delete
-    suspend fun deleteMovie(movie: MovieEntity)
+    suspend fun deleteMovies(vararg movies: MovieEntity)
+
+    @Query("DELETE FROM movie WHERE id = :id")
+    suspend fun deleteMovie(id: Int)
 }

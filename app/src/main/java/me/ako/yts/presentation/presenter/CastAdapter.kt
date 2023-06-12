@@ -4,9 +4,11 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import coil.load
+import coil.transform.CircleCropTransformation
 import me.ako.yts.R
 import me.ako.yts.data.network.model.Cast
 import me.ako.yts.databinding.ItemCastBinding
+import me.ako.yts.presentation.util.loadCircleCrop
 
 class CastAdapter(private val list: List<Cast>, private val onClicked: (Cast) -> Unit) :
     RecyclerView.Adapter<CastAdapter.CastViewHolder>() {

@@ -2,9 +2,22 @@
     <!-- Base application theme. -->
     <style name="Base.Theme.YTS" parent="Theme.Material3.DayNight.NoActionBar">
         <!-- Customize your light theme here. -->
-        <item name="colorPrimary">@color/primary</item>
-        <item name="colorAccent">@color/primary</item>
+        <item name="colorOnPrimary">@color/white</item>
+        <item name="colorOnPrimaryContainer">@color/white</item>
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:windowLightNavigationBar">true</item>
     </style>
 
-    <style name="Theme.YTS" parent="Base.Theme.YTS" />
+    <style name="Theme.YTS" parent="Base.Theme.YTS">
+        <item name="colorPrimary">@color/primary</item>
+        <item name="colorAccent">@color/primary</item>
+        <item name="colorPrimaryContainer">@color/primary</item>
+        <item name="android:windowTranslucentStatus">true</item>
+        <!--<item name="android:windowTranslucentNavigation">true</item>-->
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <!--<item name="android:navigationBarColor">@android:color/transparent</item>-->
+        <item name="android:windowLayoutInDisplayCutoutMode">shortEdges</item>
+        <item name="alertDialogTheme">@style/MaterialAlertDialog</item>
+        <item name="materialAlertDialogTheme">@style/MaterialAlertDialog</item>
+    </style>
 </resources>

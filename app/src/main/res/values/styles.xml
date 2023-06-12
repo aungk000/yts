@@ -9,4 +9,16 @@
         <item name="android:layout_marginStart">@dimen/dimen_normal</item>
         <item name="android:layout_marginEnd">@dimen/dimen_normal</item>
     </style>
+    <style name="ShapeCircle">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">50%</item>
+    </style>
+    <style name="ShapeRoundCorner">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">8dp</item>
+    </style>
+    <style name="MaterialAlertDialog" parent="ThemeOverlay.Material3.MaterialAlertDialog">
+        <!--<item name="dialogCornerRadius">@dimen/dialog_corner</item>-->
+        <item name="android:windowBackground">@drawable/dialog_inset</item>
+    </style>
 </resources>

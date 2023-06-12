@@ -4,4 +4,5 @@
     <dimen name="text_size_normal">18sp</dimen>
     <dimen name="dimen_large">16dp</dimen>
     <dimen name="dimen_normal">8dp</dimen>
+    <dimen name="dialog_corner">28dp</dimen>
 </resources>
