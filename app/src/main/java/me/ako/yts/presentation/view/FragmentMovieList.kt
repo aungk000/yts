@@ -20,7 +20,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import me.ako.yts.R
-import me.ako.yts.data.datasource.model.MovieEntity
+import me.ako.yts.data.datasource.model.MovieListEntity
 import me.ako.yts.data.network.ApiStatus
 import me.ako.yts.data.network.model.Api
 import me.ako.yts.databinding.FragmentMovieListBinding
@@ -41,7 +41,7 @@ class FragmentMovieList : Fragment() {
     lateinit var utils: Utils
 
     private var isLoading = false
-    private var movies = listOf<MovieEntity>()
+    private var movies = listOf<MovieListEntity>()
     private var searchSort = Api.Endpoint.Parameter.Sort.DownloadCount.type
     private var searchOrder = Api.Endpoint.Parameter.Order.Desc.type
 
@@ -81,7 +81,7 @@ class FragmentMovieList : Fragment() {
                 findNavController().navigate(
                     FragmentMovieListDirections.actionFragmentMovieListToFragmentMovieDetail(
                         it.id,
-                        it.title
+                        it.title?.title
                     )
                 )
             }

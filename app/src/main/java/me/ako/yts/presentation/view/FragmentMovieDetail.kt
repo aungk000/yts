@@ -24,7 +24,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.tabs.TabLayoutMediator
 import dagger.hilt.android.AndroidEntryPoint
 import me.ako.yts.R
-import me.ako.yts.data.datasource.model.MovieEntity
+import me.ako.yts.data.datasource.model.MovieDetailEntity
 import me.ako.yts.data.network.ApiStatus
 import me.ako.yts.databinding.FragmentMovieDetailBinding
 import me.ako.yts.domain.util.FileDownloader
@@ -68,9 +68,7 @@ class FragmentMovieDetail : Fragment() {
     }
 
     override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
+        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
         _binding = FragmentMovieDetailBinding.inflate(inflater, container, false)
         return binding.root
@@ -78,7 +76,7 @@ class FragmentMovieDetail : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
-        //_binding = null
+        _binding = null
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -91,23 +89,33 @@ class FragmentMovieDetail : Fragment() {
             appViewModel = viewModel
 
             viewModel.loadMovie(args.movieId).observe(viewLifecycleOwner) { movie ->
-                if(movie != null) {
+                if (movie != null) {
                     this.movie = movie
 
                     url = movie.url
 
-                    val year = movie.year.toString()
-                    val language = "[${movie.language?.uppercase()}]"
-                    val runtime = "${movie.runtime!! / 60}h ${movie.runtime % 60}m"
-                    val span = SpannableString("$year \u2022 $language \u2022 $runtime")
-                    txtYear.text = span
+                    movie.runtime?.let {
+                        val year = movie.year?.toString()
+                        val language = if (movie.language.isNullOrEmpty()) {
+                            "[Unknown]"
+                        } else {
+                            "[${movie.language?.uppercase()}]"
+                        }
+                        val runtime = "${it / 60}h ${it % 60}m"
+                        txtYear.text = SpannableString("$year \u2022 $language \u2022 $runtime")
+                    }
 
                     txtGenre.text = movie.genres?.joinToString(separator = " / ")
-                    txtLikeCount.text = utils.shortenNumber(movie.like_count!!, 10)
-                    txtDownloadCount.text = utils.shortenNumber(movie.download_count!!, 10)
-                    txtImdbRating.text = movie.rating.toString()
+                    txtImdbRating.text = movie.rating?.toString()
 
-                    imgCover.load(movie.medium_cover_image) {
+                    movie.like_count?.let {
+                        txtLikeCount.text = utils.shortenNumber(it, 10)
+                    }
+                    movie.download_count?.let {
+                        txtDownloadCount.text = utils.shortenNumber(it, 10)
+                    }
+
+                    imgCover.load(movie.image?.mediumCoverImage) {
                         crossfade(true)
                         error(ColorDrawable(Color.LTGRAY))
                     }
@@ -116,13 +124,15 @@ class FragmentMovieDetail : Fragment() {
                         navigateToImageView(movie, 0)
                     }
 
-                    txtDescription.setOnClickListener {
-                        if (txtDescription.lineCount > 5) {
-                            txtDescription.maxLines = 5
-                            txtDescription.ellipsize = TextUtils.TruncateAt.END
-                        } else {
-                            txtDescription.maxLines = Integer.MAX_VALUE
-                            txtDescription.ellipsize = null
+                    txtDescription.apply {
+                        setOnClickListener {
+                            if (lineCount > 5) {
+                                maxLines = 5
+                                ellipsize = TextUtils.TruncateAt.END
+                            } else {
+                                maxLines = Integer.MAX_VALUE
+                                ellipsize = null
+                            }
                         }
                     }
 
@@ -130,7 +140,7 @@ class FragmentMovieDetail : Fragment() {
                     txtUploadedDate.text = uploaded
 
                     txtImdbRating.setOnClickListener {
-                        if (movie.imdb_code!!.isNotBlank()) {
+                        if (!movie.imdb_code.isNullOrEmpty()) {
                             requireActivity().startActivity(utils.imdbTitle(movie.imdb_code))
                         } else {
                             utils.snack(binding.root, "IMDB link not available")
@@ -138,7 +148,7 @@ class FragmentMovieDetail : Fragment() {
                     }
 
                     txtYoutube.setOnClickListener {
-                        if (movie.yt_trailer_code!!.isNotBlank()) {
+                        if (!movie.yt_trailer_code.isNullOrEmpty()) {
                             requireActivity().startActivity(utils.youtube(movie.yt_trailer_code))
                         } else {
                             utils.snack(binding.root, "YouTube link not available")
@@ -158,11 +168,11 @@ class FragmentMovieDetail : Fragment() {
             viewModel.statusMovieDetail.observe(viewLifecycleOwner) {
                 when (it) {
                     is ApiStatus.Done -> {
-                        if(!layoutMovieDetail.isVisible) {
+                        if (!layoutMovieDetail.isVisible) {
                             layoutMovieDetail.visibility = View.VISIBLE
                         }
 
-                        if(layoutNoMovie.isVisible) {
+                        if (layoutNoMovie.isVisible) {
                             layoutNoMovie.visibility = View.GONE
                         }
 
@@ -170,11 +180,11 @@ class FragmentMovieDetail : Fragment() {
                     }
 
                     is ApiStatus.Error -> {
-                        if(layoutMovieDetail.isVisible) {
+                        if (layoutMovieDetail.isVisible) {
                             layoutMovieDetail.visibility = View.GONE
                         }
 
-                        if(!layoutNoMovie.isVisible) {
+                        if (!layoutNoMovie.isVisible) {
                             layoutNoMovie.visibility = View.VISIBLE
                         }
 
@@ -191,7 +201,7 @@ class FragmentMovieDetail : Fragment() {
             toolbar.setOnMenuItemClickListener {
                 when (it.itemId) {
                     R.id.menu_share -> {
-                        if(!url.isNullOrEmpty()) {
+                        if (!url.isNullOrEmpty()) {
                             requireActivity().startActivity(utils.shareText(url))
                         }
                         true
@@ -209,56 +219,59 @@ class FragmentMovieDetail : Fragment() {
         }
     }
 
-    private fun navigateToImageView(movie: MovieEntity, current: Int) {
-        val urls = arrayOf(
-            movie.large_cover_image!!,
-            movie.large_screenshot_image1!!,
-            movie.large_screenshot_image2!!,
-            movie.large_screenshot_image3!!
-        )
-        val action = FragmentMovieDetailDirections.actionFragmentMovieDetailToFragmentImageView(
-            urls,
-            current
-        )
-        findNavController().navigate(action)
+    private fun navigateToImageView(movie: MovieDetailEntity, current: Int) {
+        movie.image?.let { image ->
+            val urls = arrayOf(
+                image.largeCoverImage!!,
+                image.largeScreenshotImage1!!,
+                image.largeScreenshotImage2!!,
+                image.largeScreenshotImage3!!
+            )
+            val action =
+                FragmentMovieDetailDirections.actionFragmentMovieDetailToFragmentImageView(
+                    urls, current
+                )
+            findNavController().navigate(action)
+        }
     }
 
-    private fun downloadDialog(movie: MovieEntity) {
-        val downloadEntries = movie.torrents?.map { t ->
-            "${t.quality}.${t.type.replaceFirstChar { it.uppercase() }}"
-        }?.toTypedArray()
+    private fun downloadDialog(movie: MovieDetailEntity) {
+        movie.torrents?.let { list ->
+            val downloadEntries = list.map { torrent ->
+                "${torrent.quality}.${torrent.type?.replaceFirstChar { it.uppercase() }}"
+            }.toTypedArray()
 
-        val checkedItem = 0
+            val checkedItem = 0
 
-        torrentUrl = movie.torrents!![checkedItem].url
-        torrentTitle = "${movie.title_long} [${movie.torrents[checkedItem].quality}] " +
-                "[${movie.torrents[checkedItem].type.replaceFirstChar { it.uppercase() }}] " +
-                "[YTS.MX].torrent"
-
-        MaterialAlertDialogBuilder(requireContext())
-            .setTitle("Torrents")
-            .setSingleChoiceItems(downloadEntries, checkedItem) { v, which ->
-                torrentUrl = movie.torrents[which].url
-                torrentTitle = "${movie.title_long} [${movie.torrents[which].quality}] " +
-                        "[${movie.torrents[which].type.replaceFirstChar { it.uppercase() }}] " +
+            torrentUrl = list[checkedItem].url
+            torrentTitle =
+                "${movie.title?.titleLong} [${list[checkedItem].quality}] " +
+                        "[${list[checkedItem].type?.replaceFirstChar { it.uppercase() }}] " +
                         "[YTS.MX].torrent"
-            }
-            .setPositiveButton("Download") { v, which ->
-                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
-                    if (ContextCompat.checkSelfPermission(
-                            requireContext(),
-                            Manifest.permission.WRITE_EXTERNAL_STORAGE
-                        ) == PackageManager.PERMISSION_GRANTED
-                    ) {
-                        downloadTorrent()
-                    } else {
-                        requestPermissionLauncher.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                    }
-                }
 
-                v.dismiss()
-            }
-            .show()
+            MaterialAlertDialogBuilder(requireContext())
+                .setTitle("Torrents")
+                .setSingleChoiceItems(downloadEntries, checkedItem) { v, which ->
+                    torrentUrl = list[which].url
+                    torrentTitle =
+                        "${movie.title?.titleLong} [${list[which].quality}] " +
+                                "[${list[which].type?.replaceFirstChar { it.uppercase() }}] " +
+                                "[YTS.MX].torrent"
+                }.setPositiveButton("Download") { v, which ->
+                    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
+                        if (ContextCompat.checkSelfPermission(
+                                requireContext(), Manifest.permission.WRITE_EXTERNAL_STORAGE
+                            ) == PackageManager.PERMISSION_GRANTED
+                        ) {
+                            downloadTorrent()
+                        } else {
+                            requestPermissionLauncher.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                        }
+                    }
+
+                    v.dismiss()
+                }.show()
+        }
     }
 
     private fun setupMovieSuggestion() {
@@ -276,46 +289,54 @@ class FragmentMovieDetail : Fragment() {
         }
     }
 
-    private fun setupCast(movie: MovieEntity) {
-        binding.apply {
-            val castAdapter = CastAdapter(movie.cast!!) { cast ->
-                if (cast.imdb_code.isNotBlank()) {
-                    requireActivity().startActivity(utils.imdbName(cast.imdb_code))
-                } else {
-                    utils.snack(binding.root, "IMDB link not available")
+    private fun setupCast(movie: MovieDetailEntity) {
+        movie.cast?.let { list ->
+            binding.apply {
+                val castAdapter = CastAdapter(list) { cast ->
+                    if (!cast.imdb_code.isNullOrEmpty()) {
+                        requireActivity().startActivity(utils.imdbName(cast.imdb_code))
+                    } else {
+                        utils.snack(binding.root, "IMDB link not available")
+                    }
                 }
+                recyclerCast.adapter = castAdapter
             }
-            recyclerCast.adapter = castAdapter
         }
     }
 
-    private fun setupTechSpecs(movie: MovieEntity) {
-        binding.apply {
-            viewPagerTechSpecs.adapter = TorrentAdapter(movie.torrents!!)
-            TabLayoutMediator(tabsTechSpecs, viewPagerTechSpecs) { tab, position ->
-                val title =
-                    "${movie.torrents[position].quality}.${movie.torrents[position].type.replaceFirstChar { it.uppercase() }}"
-                tab.text = title
-            }.attach()
+    private fun setupTechSpecs(movie: MovieDetailEntity) {
+        movie.torrents?.let { list ->
+            binding.apply {
+                viewPagerTechSpecs.adapter = TorrentAdapter(list)
+                TabLayoutMediator(tabsTechSpecs, viewPagerTechSpecs) { tab, position ->
+                    val title = "${list[position].quality}." +
+                            list[position].type?.replaceFirstChar { it.uppercase() }
+                    tab.text = title
+                }.attach()
+            }
         }
     }
 
-    private fun setupScreenshot(movie: MovieEntity) {
+    private fun setupScreenshot(movie: MovieDetailEntity) {
         binding.apply {
-            val screenshots = listOf(
-                movie.large_screenshot_image1,
-                movie.large_screenshot_image2,
-                movie.large_screenshot_image3
-            )
-            viewPagerScreenshot.adapter = ScreenshotAdapter(screenshots) {
-                val i = screenshots.indexOf(it)
-                navigateToImageView(movie, i + 1)
+            movie.image?.let { image ->
+                val screenshots = listOf(
+                    image.largeScreenshotImage1,
+                    image.largeScreenshotImage2,
+                    image.largeScreenshotImage3
+                )
+                viewPagerScreenshot.adapter = ScreenshotAdapter(screenshots) {
+                    val i = screenshots.indexOf(it)
+                    navigateToImageView(movie, i + 1)
+                }
+                pageIndicator.setupWithViewPager(viewPagerScreenshot)
             }
-            pageIndicator.setupWithViewPager(viewPagerScreenshot)
         }
     }
 
     private fun downloadTorrent() {
-        downloader.downloadTorrent(torrentUrl, torrentTitle)
+        if (!torrentUrl.isNullOrEmpty() && !torrentTitle.isNullOrEmpty()) {
+            downloader.downloadTorrent(torrentUrl!!, torrentTitle!!)
+        }
     }
 }

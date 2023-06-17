@@ -2,11 +2,11 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "ad95cbb29510ab630f78100db0383b5c",
+    "identityHash": "ed7bc1cc3d0908b94a7f752c1454551b",
     "entities": [
       {
-        "tableName": "movie",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER NOT NULL, `url` TEXT, `imdb_code` TEXT, `title` TEXT, `title_english` TEXT, `title_long` TEXT, `slug` TEXT, `year` INTEGER, `rating` REAL, `runtime` INTEGER, `genres` TEXT, `summary` TEXT, `description_full` TEXT, `synopsis` TEXT, `yt_trailer_code` TEXT, `language` TEXT, `mpa_rating` TEXT, `background_image` TEXT, `background_image_original` TEXT, `small_cover_image` TEXT, `medium_cover_image` TEXT, `large_cover_image` TEXT, `state` TEXT, `torrents` TEXT, `date_uploaded` TEXT, `date_uploaded_unix` INTEGER, PRIMARY KEY(`id`))",
+        "tableName": "movie_list",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER NOT NULL, `url` TEXT DEFAULT NULL, `imdb_code` TEXT DEFAULT NULL, `title` TEXT DEFAULT NULL, `slug` TEXT DEFAULT NULL, `year` INTEGER DEFAULT NULL, `rating` REAL DEFAULT NULL, `runtime` INTEGER DEFAULT NULL, `genres` TEXT DEFAULT NULL, `download_count` INTEGER DEFAULT NULL, `like_count` INTEGER DEFAULT NULL, `description` TEXT DEFAULT NULL, `yt_trailer_code` TEXT DEFAULT NULL, `language` TEXT DEFAULT NULL, `mpa_rating` TEXT DEFAULT NULL, `image` TEXT DEFAULT NULL, `cast` TEXT DEFAULT NULL, `state` TEXT DEFAULT NULL, `torrents` TEXT DEFAULT NULL, `date_uploaded` TEXT DEFAULT NULL, `date_uploaded_unix` INTEGER DEFAULT NULL, PRIMARY KEY(`id`))",
         "fields": [
           {
             "fieldPath": "id",
@@ -18,151 +18,294 @@
             "fieldPath": "url",
             "columnName": "url",
             "affinity": "TEXT",
-            "notNull": false
+            "notNull": false,
+            "defaultValue": "NULL"
           },
           {
             "fieldPath": "imdb_code",
             "columnName": "imdb_code",
             "affinity": "TEXT",
-            "notNull": false
+            "notNull": false,
+            "defaultValue": "NULL"
           },
           {
             "fieldPath": "title",
             "columnName": "title",
             "affinity": "TEXT",
-            "notNull": false
-          },
-          {
-            "fieldPath": "title_english",
-            "columnName": "title_english",
-            "affinity": "TEXT",
-            "notNull": false
-          },
-          {
-            "fieldPath": "title_long",
-            "columnName": "title_long",
-            "affinity": "TEXT",
-            "notNull": false
+            "notNull": false,
+            "defaultValue": "NULL"
           },
           {
             "fieldPath": "slug",
             "columnName": "slug",
             "affinity": "TEXT",
-            "notNull": false
+            "notNull": false,
+            "defaultValue": "NULL"
           },
           {
             "fieldPath": "year",
             "columnName": "year",
             "affinity": "INTEGER",
-            "notNull": false
+            "notNull": false,
+            "defaultValue": "NULL"
           },
           {
             "fieldPath": "rating",
             "columnName": "rating",
             "affinity": "REAL",
-            "notNull": false
+            "notNull": false,
+            "defaultValue": "NULL"
           },
           {
             "fieldPath": "runtime",
             "columnName": "runtime",
             "affinity": "INTEGER",
-            "notNull": false
+            "notNull": false,
+            "defaultValue": "NULL"
           },
           {
             "fieldPath": "genres",
             "columnName": "genres",
             "affinity": "TEXT",
-            "notNull": false
+            "notNull": false,
+            "defaultValue": "NULL"
           },
           {
-            "fieldPath": "summary",
-            "columnName": "summary",
-            "affinity": "TEXT",
-            "notNull": false
+            "fieldPath": "download_count",
+            "columnName": "download_count",
+            "affinity": "INTEGER",
+            "notNull": false,
+            "defaultValue": "NULL"
           },
           {
-            "fieldPath": "description_full",
-            "columnName": "description_full",
-            "affinity": "TEXT",
-            "notNull": false
+            "fieldPath": "like_count",
+            "columnName": "like_count",
+            "affinity": "INTEGER",
+            "notNull": false,
+            "defaultValue": "NULL"
           },
           {
-            "fieldPath": "synopsis",
-            "columnName": "synopsis",
+            "fieldPath": "description",
+            "columnName": "description",
             "affinity": "TEXT",
-            "notNull": false
+            "notNull": false,
+            "defaultValue": "NULL"
           },
           {
             "fieldPath": "yt_trailer_code",
             "columnName": "yt_trailer_code",
             "affinity": "TEXT",
-            "notNull": false
+            "notNull": false,
+            "defaultValue": "NULL"
           },
           {
             "fieldPath": "language",
             "columnName": "language",
             "affinity": "TEXT",
-            "notNull": false
+            "notNull": false,
+            "defaultValue": "NULL"
           },
           {
             "fieldPath": "mpa_rating",
             "columnName": "mpa_rating",
             "affinity": "TEXT",
-            "notNull": false
+            "notNull": false,
+            "defaultValue": "NULL"
           },
           {
-            "fieldPath": "background_image",
-            "columnName": "background_image",
+            "fieldPath": "image",
+            "columnName": "image",
             "affinity": "TEXT",
-            "notNull": false
+            "notNull": false,
+            "defaultValue": "NULL"
           },
           {
-            "fieldPath": "background_image_original",
-            "columnName": "background_image_original",
+            "fieldPath": "cast",
+            "columnName": "cast",
             "affinity": "TEXT",
-            "notNull": false
-          },
-          {
-            "fieldPath": "small_cover_image",
-            "columnName": "small_cover_image",
-            "affinity": "TEXT",
-            "notNull": false
-          },
-          {
-            "fieldPath": "medium_cover_image",
-            "columnName": "medium_cover_image",
-            "affinity": "TEXT",
-            "notNull": false
-          },
-          {
-            "fieldPath": "large_cover_image",
-            "columnName": "large_cover_image",
-            "affinity": "TEXT",
-            "notNull": false
+            "notNull": false,
+            "defaultValue": "NULL"
           },
           {
             "fieldPath": "state",
             "columnName": "state",
             "affinity": "TEXT",
-            "notNull": false
+            "notNull": false,
+            "defaultValue": "NULL"
           },
           {
             "fieldPath": "torrents",
             "columnName": "torrents",
             "affinity": "TEXT",
-            "notNull": false
+            "notNull": false,
+            "defaultValue": "NULL"
           },
           {
             "fieldPath": "date_uploaded",
             "columnName": "date_uploaded",
             "affinity": "TEXT",
-            "notNull": false
+            "notNull": false,
+            "defaultValue": "NULL"
           },
           {
             "fieldPath": "date_uploaded_unix",
             "columnName": "date_uploaded_unix",
             "affinity": "INTEGER",
-            "notNull": false
+            "notNull": false,
+            "defaultValue": "NULL"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "movie_detail",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER NOT NULL, `url` TEXT DEFAULT NULL, `imdb_code` TEXT DEFAULT NULL, `title` TEXT DEFAULT NULL, `slug` TEXT DEFAULT NULL, `year` INTEGER DEFAULT NULL, `rating` REAL DEFAULT NULL, `runtime` INTEGER DEFAULT NULL, `genres` TEXT DEFAULT NULL, `download_count` INTEGER DEFAULT NULL, `like_count` INTEGER DEFAULT NULL, `description` TEXT DEFAULT NULL, `yt_trailer_code` TEXT DEFAULT NULL, `language` TEXT DEFAULT NULL, `mpa_rating` TEXT DEFAULT NULL, `image` TEXT DEFAULT NULL, `cast` TEXT DEFAULT NULL, `torrents` TEXT DEFAULT NULL, `date_uploaded` TEXT DEFAULT NULL, `date_uploaded_unix` INTEGER DEFAULT NULL, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "url",
+            "columnName": "url",
+            "affinity": "TEXT",
+            "notNull": false,
+            "defaultValue": "NULL"
+          },
+          {
+            "fieldPath": "imdb_code",
+            "columnName": "imdb_code",
+            "affinity": "TEXT",
+            "notNull": false,
+            "defaultValue": "NULL"
+          },
+          {
+            "fieldPath": "title",
+            "columnName": "title",
+            "affinity": "TEXT",
+            "notNull": false,
+            "defaultValue": "NULL"
+          },
+          {
+            "fieldPath": "slug",
+            "columnName": "slug",
+            "affinity": "TEXT",
+            "notNull": false,
+            "defaultValue": "NULL"
+          },
+          {
+            "fieldPath": "year",
+            "columnName": "year",
+            "affinity": "INTEGER",
+            "notNull": false,
+            "defaultValue": "NULL"
+          },
+          {
+            "fieldPath": "rating",
+            "columnName": "rating",
+            "affinity": "REAL",
+            "notNull": false,
+            "defaultValue": "NULL"
+          },
+          {
+            "fieldPath": "runtime",
+            "columnName": "runtime",
+            "affinity": "INTEGER",
+            "notNull": false,
+            "defaultValue": "NULL"
+          },
+          {
+            "fieldPath": "genres",
+            "columnName": "genres",
+            "affinity": "TEXT",
+            "notNull": false,
+            "defaultValue": "NULL"
+          },
+          {
+            "fieldPath": "download_count",
+            "columnName": "download_count",
+            "affinity": "INTEGER",
+            "notNull": false,
+            "defaultValue": "NULL"
+          },
+          {
+            "fieldPath": "like_count",
+            "columnName": "like_count",
+            "affinity": "INTEGER",
+            "notNull": false,
+            "defaultValue": "NULL"
+          },
+          {
+            "fieldPath": "description",
+            "columnName": "description",
+            "affinity": "TEXT",
+            "notNull": false,
+            "defaultValue": "NULL"
+          },
+          {
+            "fieldPath": "yt_trailer_code",
+            "columnName": "yt_trailer_code",
+            "affinity": "TEXT",
+            "notNull": false,
+            "defaultValue": "NULL"
+          },
+          {
+            "fieldPath": "language",
+            "columnName": "language",
+            "affinity": "TEXT",
+            "notNull": false,
+            "defaultValue": "NULL"
+          },
+          {
+            "fieldPath": "mpa_rating",
+            "columnName": "mpa_rating",
+            "affinity": "TEXT",
+            "notNull": false,
+            "defaultValue": "NULL"
+          },
+          {
+            "fieldPath": "image",
+            "columnName": "image",
+            "affinity": "TEXT",
+            "notNull": false,
+            "defaultValue": "NULL"
+          },
+          {
+            "fieldPath": "cast",
+            "columnName": "cast",
+            "affinity": "TEXT",
+            "notNull": false,
+            "defaultValue": "NULL"
+          },
+          {
+            "fieldPath": "torrents",
+            "columnName": "torrents",
+            "affinity": "TEXT",
+            "notNull": false,
+            "defaultValue": "NULL"
+          },
+          {
+            "fieldPath": "date_uploaded",
+            "columnName": "date_uploaded",
+            "affinity": "TEXT",
+            "notNull": false,
+            "defaultValue": "NULL"
+          },
+          {
+            "fieldPath": "date_uploaded_unix",
+            "columnName": "date_uploaded_unix",
+            "affinity": "INTEGER",
+            "notNull": false,
+            "defaultValue": "NULL"
           }
         ],
         "primaryKey": {
@@ -178,7 +321,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'ad95cbb29510ab630f78100db0383b5c')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'ed7bc1cc3d0908b94a7f752c1454551b')"
     ]
   }
 }

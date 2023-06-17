@@ -1,20 +1,21 @@
 package me.ako.yts.domain.controller
 
 
-import androidx.lifecycle.LiveData
 import kotlinx.coroutines.flow.Flow
-import me.ako.yts.data.datasource.model.MovieEntity
-import me.ako.yts.data.network.ApiStatus
-import me.ako.yts.data.network.model.MovieListResponse
+import me.ako.yts.data.datasource.model.MovieDetailEntity
+import me.ako.yts.data.datasource.model.MovieListEntity
 
 interface DataRepository {
-    fun loadMovies(limit: Int?, offset: Int?): Flow<List<MovieEntity>>
-    fun loadMovies(): Flow<List<MovieEntity>>
-    fun loadMovie(id: Int): Flow<MovieEntity?>
-    suspend fun deleteMovies(vararg movies: MovieEntity)
-    suspend fun deleteMovie(id: Int)
+    fun loadMovies(limit: Int?, offset: Int?): Flow<List<MovieListEntity>>
+    fun loadMovies(): Flow<List<MovieListEntity>>
+    fun loadMovie(id: Int): Flow<MovieDetailEntity?>
+    suspend fun deleteMovieList(vararg movies: MovieListEntity)
+    suspend fun deleteMovieDetail(vararg movies: MovieDetailEntity)
+    suspend fun deleteMovieList(id: Int)
+    suspend fun deleteMovieDetail(id: Int)
 
-    suspend fun deleteAll()
-    suspend fun refreshMovies(limit: Int, page: Int)
-    suspend fun refreshMovie(id: Int)
+    suspend fun deleteAllMovieList()
+    suspend fun deleteAllMovieDetail()
+    suspend fun refreshMovieList(limit: Int, page: Int)
+    suspend fun refreshMovieDetail(id: Int)
 }

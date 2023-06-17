@@ -6,17 +6,15 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import coil.load
-import coil.transform.RoundedCornersTransformation
-import me.ako.yts.R
 import me.ako.yts.databinding.ItemScreenshotBinding
 
 
-class ScreenshotAdapter(private val list: List<String?>, private val onItemClicked: (String) -> Unit) :
+class ScreenshotAdapter(private val list: List<String?>, private val onItemClicked: (String?) -> Unit) :
     RecyclerView.Adapter<ScreenshotAdapter.ScreenshotViewHolder>() {
 
     class ScreenshotViewHolder(private val binding: ItemScreenshotBinding) :
         RecyclerView.ViewHolder(binding.root) {
-        fun onBind(url: String) {
+        fun onBind(url: String?) {
             binding.apply {
                 imgScreenshot.load(url) {
                     crossfade(true)
@@ -38,7 +36,7 @@ class ScreenshotAdapter(private val list: List<String?>, private val onItemClick
 
     override fun onBindViewHolder(holder: ScreenshotViewHolder, position: Int) {
         val item = list[position]
-        holder.onBind(item!!)
+        holder.onBind(item)
         holder.itemView.setOnClickListener {
             onItemClicked(item)
         }

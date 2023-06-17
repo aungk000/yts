@@ -19,8 +19,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import me.ako.yts.data.network.model.Api
-import java.io.File
-import java.io.IOException
 import kotlin.math.ceil
 
 class Utils(private val context: Context) {

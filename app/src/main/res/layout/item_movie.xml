@@ -6,7 +6,7 @@
     <data>
         <variable
             name="movie"
-            type="me.ako.yts.data.datasource.model.MovieEntity" />
+            type="me.ako.yts.data.datasource.model.MovieListEntity" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -30,7 +30,6 @@
         <com.google.android.material.textview.MaterialTextView
             android:id="@+id/txt_title"
             android:layout_marginTop="8dp"
-            android:text="@{movie.title}"
             android:ellipsize="end"
             android:maxLines="1"
             app:layout_constraintStart_toStartOf="@id/img_cover"

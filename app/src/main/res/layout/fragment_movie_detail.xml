@@ -6,7 +6,7 @@
     <data>
         <variable
             name="movie"
-            type="me.ako.yts.data.datasource.model.MovieEntity" />
+            type="me.ako.yts.data.datasource.model.MovieDetailEntity" />
         <variable
             name="appViewModel"
             type="me.ako.yts.domain.viewmodel.AppViewModel" />
@@ -47,7 +47,7 @@
 
                 <com.google.android.material.textview.MaterialTextView
                     android:id="@+id/txt_title"
-                    android:text="@{movie.title}"
+                    android:text="@{movie.title.title}"
                     android:padding="@dimen/dimen_normal"
                     android:textStyle="bold"
                     android:textSize="@dimen/text_size_large"
@@ -139,6 +139,17 @@
                     android:layout_height="wrap_content"/>
 
                 <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_download_subtitle"
+                    android:layout_marginTop="@dimen/dimen_normal"
+                    app:iconGravity="textStart"
+                    app:icon="@drawable/ic_download"
+                    android:text="@string/download"
+                    app:layout_constraintTop_toBottomOf="@id/txt_imdb_rating"
+                    app:layout_constraintStart_toEndOf="@id/img_cover"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"/>
+
+                <com.google.android.material.button.MaterialButton
                     android:id="@+id/btn_download"
                     android:layout_marginTop="@dimen/dimen_normal"
                     app:iconGravity="textStart"
@@ -185,7 +196,7 @@
                     android:id="@+id/txt_description"
                     android:background="?selectableItemBackground"
                     android:textSize="@dimen/text_size_normal"
-                    android:text="@{movie.description_full}"
+                    android:text="@{movie.description.descriptionFull}"
                     android:maxLines="5"
                     android:ellipsize="end"
                     android:padding="@dimen/dimen_normal"

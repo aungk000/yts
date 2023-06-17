@@ -113,8 +113,7 @@ class FragmentImageView : Fragment() {
         binding.apply {
             lifecycleOwner = viewLifecycleOwner
 
-            val urls = args.urls
-            viewPagerImage.adapter = ImageViewAdapter(urls)
+            viewPagerImage.adapter = ImageViewAdapter(args.urls)
             viewPagerImage.setCurrentItem(args.current, false)
 
             /*toolbar.setOnMenuItemClickListener {

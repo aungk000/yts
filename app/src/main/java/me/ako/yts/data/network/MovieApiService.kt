@@ -1,5 +1,6 @@
 package me.ako.yts.data.network
 
+import com.google.gson.Gson
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import me.ako.yts.data.network.model.MovieDetailResponse
@@ -69,19 +70,21 @@ object MovieApi {
     }
 }
 
-class MoshiParser(private val moshi: Moshi): JsonParser {
-    override fun <T> fromJson(json: String, type: Type): T? {
-        return moshi.adapter<T>(type).fromJson(json)
+class MoshiParser(private val moshi: Moshi) : JsonParser {
+    override fun <T> fromJson(json: String?, type: Type): T? {
+        return json?.let {
+            moshi.adapter<T>(type).fromJson(it)
+        }
     }
 
-    override fun <T> toJson(obj: T, type: Type): String? {
+    override fun <T> toJson(obj: T?, type: Type): String? {
         return moshi.adapter<T>(type).toJson(obj)
     }
 }
 
 interface JsonParser {
-    fun <T> fromJson(json: String, type: Type): T?
-    fun <T> toJson(obj: T, type: Type): String?
+    fun <T> fromJson(json: String?, type: Type): T?
+    fun <T> toJson(obj: T?, type: Type): String?
 }
 
 sealed class ApiStatus(val message: String?) {

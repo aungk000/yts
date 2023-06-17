@@ -10,7 +10,6 @@ import coil.transform.CircleCropTransformation
 import coil.transform.RoundedCornersTransformation
 import com.google.android.material.progressindicator.CircularProgressIndicator
 import me.ako.yts.data.network.ApiStatus
-import me.ako.yts.data.network.MovieApi
 
 
 @BindingAdapter("loadCircleCrop")

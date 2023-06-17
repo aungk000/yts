@@ -35,7 +35,8 @@ class SettingsFragment : PreferenceFragmentCompat(), OnPreferenceChangeListener 
                 .setMessage("Are you sure you want to delete movie data?")
                 .setPositiveButton("Delete") { v, which ->
                     lifecycleScope.launch {
-                        repository.deleteAll()
+                        repository.deleteAllMovieList()
+                        repository.deleteAllMovieDetail()
                     }
 
                     viewModel.clearMovies()

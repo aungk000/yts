@@ -13,7 +13,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.launch
-import me.ako.yts.data.datasource.model.MovieEntity
+import me.ako.yts.data.datasource.model.MovieDetailEntity
+import me.ako.yts.data.datasource.model.MovieListEntity
 import me.ako.yts.data.network.ApiStatus
 import me.ako.yts.data.network.MovieApiService
 import me.ako.yts.data.network.model.MovieList
@@ -32,11 +33,11 @@ class AppViewModel @Inject constructor(
     private val page = MutableStateFlow(1)
     private var limit = MutableStateFlow(20)
     private var offset = MutableStateFlow(0)
-    private val movieSet = mutableSetOf<MovieEntity>()
+    private val movieSet = mutableSetOf<MovieListEntity>()
     private var isEmptyList = false
 
     private val _statusMovies = MutableLiveData<ApiStatus>()
-    private val _movies = MutableLiveData<List<MovieEntity>>()
+    private val _movies = MutableLiveData<List<MovieListEntity>>()
     private val _statusSearch = MutableLiveData<ApiStatus>()
     private val _moviesSearch = MutableLiveData<List<MovieList>?>()
     @OptIn(ExperimentalCoroutinesApi::class)
@@ -62,7 +63,7 @@ class AppViewModel @Inject constructor(
         }
     }
     val statusMovies: LiveData<ApiStatus> = _statusMovies
-    val movies: LiveData<List<MovieEntity>> = _movies
+    val movies: LiveData<List<MovieListEntity>> = _movies
     val statusSearch: LiveData<ApiStatus> = _statusSearch
     val moviesSearch: LiveData<List<MovieList>?> = _moviesSearch
     val sort = utils.sortFlow.asLiveData()
@@ -85,11 +86,11 @@ class AppViewModel @Inject constructor(
         _statusMovies.value = ApiStatus.Loading("Loading movies")
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                repository.refreshMovies(limit.value, page)
+                repository.refreshMovieList(limit.value, page)
                 _statusMovies.postValue(ApiStatus.Done(null))
             } catch (e: Exception) {
-                Log.d("AppViewModel", "refreshMovies: ${e.message}")
-                _statusMovies.postValue(ApiStatus.Error(e.message))
+                Log.e("AppViewModel", "refreshMovies: ${e.localizedMessage}")
+                _statusMovies.postValue(ApiStatus.Error(e.localizedMessage))
             }
         }
     }
@@ -131,17 +132,17 @@ class AppViewModel @Inject constructor(
         _statusMovieDetailNetwork.value = ApiStatus.Loading("Loading movie detail")
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                repository.refreshMovie(id)
+                repository.refreshMovieDetail(id)
                 _statusMovieDetailNetwork.postValue(ApiStatus.Done("Finished loading movie detail"))
             } catch (e: Exception) {
-                Log.d("AppViewModel", "refreshMovie: ${e.message}")
-                _statusMovieDetailNetwork.postValue(ApiStatus.Error(e.message))
+                Log.e("AppViewModel", "refreshMovie: ${e.localizedMessage}")
+                _statusMovieDetailNetwork.postValue(ApiStatus.Error(e.localizedMessage))
             }
         }
     }
 
-    fun loadMovie(movie_id: Int): LiveData<MovieEntity?> {
-        val movie = MutableLiveData<MovieEntity>()
+    fun loadMovie(movie_id: Int): LiveData<MovieDetailEntity?> {
+        val movie = MutableLiveData<MovieDetailEntity>()
         _statusMovieDetailDatabase.value = ApiStatus.Loading("Loading movie detail")
         viewModelScope.launch(Dispatchers.IO) {
             try {
@@ -154,7 +155,7 @@ class AppViewModel @Inject constructor(
                     }
                 }
             } catch (e: Exception) {
-                Log.d("AppViewModel", "loadMovie: ${e.message}")
+                Log.d("AppViewModel", "loadMovie: ${e.localizedMessage}")
                 _statusMovieDetailDatabase.postValue(ApiStatus.Error(e.message))
             }
         }
@@ -172,7 +173,7 @@ class AppViewModel @Inject constructor(
         offset.value = 0
     }
 
-    private fun filterNewMovies(list: List<MovieEntity>) {
+    private fun filterNewMovies(list: List<MovieListEntity>) {
         if (movieSet.isNotEmpty()) {
             val currentList = movieSet.distinctBy {
                 it.id
