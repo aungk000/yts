@@ -75,7 +75,6 @@
 
             <com.google.android.material.textview.MaterialTextView
                 android:id="@+id/txt_torrent_date"
-                android:text="@{torrent.date_uploaded}"
                 android:padding="@dimen/dimen_normal"
                 android:ellipsize="end"
                 android:maxLines="1"

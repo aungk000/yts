@@ -2,6 +2,7 @@ package me.ako.yts.domain.util
 
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.util.Log
 import android.view.View
@@ -137,11 +138,28 @@ class Utils(private val context: Context) {
         return short
     }
 
-    fun url(url: String) {
-        val intent =
-            Intent(Intent.ACTION_VIEW, Uri.parse(url))
+    fun url(url: String): Intent {
+        return Intent(Intent.ACTION_VIEW, Uri.parse(Uri.encode(url)))
+    }
+
+    fun magnet(magnetUrl: String) {
+        val uri = Uri.parse(magnetUrl)
+        val intent = Intent(Intent.ACTION_VIEW)
+        intent.data = uri
+        intent.addCategory(Intent.CATEGORY_DEFAULT)
         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-        context.startActivity(intent)
+
+        val activities = context.packageManager.queryIntentActivities(intent, 0)
+
+        if (activities.isNotEmpty()) {
+            context.startActivity(intent)
+        } else {
+            Toast.makeText(context, "No torrent client app found.", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    fun subtitle(imdb_code: String?): Intent {
+        return Intent(Intent.ACTION_VIEW, Uri.parse("https://yifysubtitles.ch/movie-imdb/$imdb_code"))
     }
 
     fun shareText(extra: String?): Intent = Intent.createChooser(Intent().apply {

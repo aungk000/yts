@@ -20,6 +20,8 @@ class TorrentAdapter(private val list: List<Torrent>) :
                 txtTorrentPeers.text = peers
                 val seeds = "Seeds: ${torrent.seeds}"
                 txtTorrentSeeds.text = seeds
+                val date = torrent.date_uploaded?.substringBefore(" ")
+                txtTorrentDate.text = date
                 executePendingBindings()
             }
         }

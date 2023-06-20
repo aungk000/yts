@@ -6,14 +6,25 @@ import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Build
 import android.os.Bundle
+import android.text.Spannable
 import android.text.SpannableString
+import android.text.SpannableStringBuilder
+import android.text.Spanned
+import android.text.TextPaint
 import android.text.TextUtils
+import android.text.method.LinkMovementMethod
+import android.text.style.ClickableSpan
+import android.text.style.ForegroundColorSpan
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.ViewTreeObserver
+import android.widget.TextView
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
+import androidx.core.view.doOnLayout
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -96,13 +107,13 @@ class FragmentMovieDetail : Fragment() {
 
                     movie.runtime?.let {
                         val year = movie.year?.toString()
-                        val language = if (movie.language.isNullOrEmpty()) {
-                            "[Unknown]"
+                        val rated = if (movie.mpa_rating.isNullOrEmpty()) {
+                            "Unrated"
                         } else {
-                            "[${movie.language?.uppercase()}]"
+                            movie.mpa_rating?.uppercase()
                         }
                         val runtime = "${it / 60}h ${it % 60}m"
-                        txtYear.text = SpannableString("$year \u2022 $language \u2022 $runtime")
+                        txtYear.text = SpannableString("$year \u2022 $rated \u2022 $runtime")
                     }
 
                     txtGenre.text = movie.genres?.joinToString(separator = " / ")
@@ -115,6 +126,11 @@ class FragmentMovieDetail : Fragment() {
                         txtDownloadCount.text = utils.shortenNumber(it, 10)
                     }
 
+                    imgBackground.load(movie.image?.backgroundImageOriginal) {
+                        crossfade(true)
+                        error(ColorDrawable(Color.LTGRAY))
+                    }
+
                     imgCover.load(movie.image?.mediumCoverImage) {
                         crossfade(true)
                         error(ColorDrawable(Color.LTGRAY))
@@ -122,18 +138,6 @@ class FragmentMovieDetail : Fragment() {
 
                     imgCover.setOnClickListener {
                         navigateToImageView(movie, 0)
-                    }
-
-                    txtDescription.apply {
-                        setOnClickListener {
-                            if (lineCount > 5) {
-                                maxLines = 5
-                                ellipsize = TextUtils.TruncateAt.END
-                            } else {
-                                maxLines = Integer.MAX_VALUE
-                                ellipsize = null
-                            }
-                        }
                     }
 
                     val uploaded = "Uploaded: ${movie.date_uploaded}"
@@ -157,6 +161,10 @@ class FragmentMovieDetail : Fragment() {
 
                     btnDownload.setOnClickListener {
                         downloadDialog(movie)
+                    }
+
+                    btnDownloadSubtitle.setOnClickListener {
+                        requireActivity().startActivity(utils.subtitle(movie.imdb_code))
                     }
 
                     setupCast(movie)
@@ -237,6 +245,7 @@ class FragmentMovieDetail : Fragment() {
 
     private fun downloadDialog(movie: MovieDetailEntity) {
         movie.torrents?.let { list ->
+
             val downloadEntries = list.map { torrent ->
                 "${torrent.quality}.${torrent.type?.replaceFirstChar { it.uppercase() }}"
             }.toTypedArray()
@@ -249,6 +258,19 @@ class FragmentMovieDetail : Fragment() {
                         "[${list[checkedItem].type?.replaceFirstChar { it.uppercase() }}] " +
                         "[YTS.MX].torrent"
 
+            var movieName = "${movie.title?.titleLong?.replace(" ","+")}+[${list[checkedItem].quality}]+[YTS.MX]"
+            var magnetUrl = "magnet:?xt=urn:btih:${list[checkedItem].hash}&dn=${movieName}" +
+                    "&tr=udp://glotorrents.pw:6969/announce" +
+                    "&tr=udp://tracker.opentrackr.org:1337/announce" +
+                    "&tr=udp://torrent.gresille.org:80/announce" +
+                    "&tr=udp://tracker.openbittorrent.com:80" +
+                    "&tr=udp://tracker.coppersurfer.tk:6969" +
+                    "&tr=udp://tracker.leechers-paradise.org:6969" +
+                    "&tr=udp://p4p.arenabg.ch:1337" +
+                    "&tr=udp://tracker.internetwarriors.net:1337"
+            Log.d("FragmentMovieDetail", "magnetUrl: $magnetUrl")
+            Log.d("FragmentMovieDetail", "magnetUrlLength: ${magnetUrl.length}")
+
             MaterialAlertDialogBuilder(requireContext())
                 .setTitle("Torrents")
                 .setSingleChoiceItems(downloadEntries, checkedItem) { v, which ->
@@ -257,7 +279,24 @@ class FragmentMovieDetail : Fragment() {
                         "${movie.title?.titleLong} [${list[which].quality}] " +
                                 "[${list[which].type?.replaceFirstChar { it.uppercase() }}] " +
                                 "[YTS.MX].torrent"
-                }.setPositiveButton("Download") { v, which ->
+
+                    movieName = "${movie.title?.titleLong?.replace(" ","+")}+[${list[which].quality}]+[YTS.MX]"
+                    magnetUrl = "magnet:?xt=urn:btih:${list[which].hash}&dn=${movieName}" +
+                            "&tr=udp://glotorrents.pw:6969/announce" +
+                            "&tr=udp://tracker.opentrackr.org:1337/announce" +
+                            "&tr=udp://torrent.gresille.org:80/announce" +
+                            "&tr=udp://tracker.openbittorrent.com:80" +
+                            "&tr=udp://tracker.coppersurfer.tk:6969" +
+                            "&tr=udp://tracker.leechers-paradise.org:6969" +
+                            "&tr=udp://p4p.arenabg.ch:1337" +
+                            "&tr=udp://tracker.internetwarriors.net:1337"
+                }
+                .setNegativeButton("Magnet") { v, which ->
+                    utils.magnet(magnetUrl)
+
+                    v.dismiss()
+                }
+                .setPositiveButton("Download") { v, which ->
                     if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
                         if (ContextCompat.checkSelfPermission(
                                 requireContext(), Manifest.permission.WRITE_EXTERNAL_STORAGE
@@ -332,6 +371,10 @@ class FragmentMovieDetail : Fragment() {
                 pageIndicator.setupWithViewPager(viewPagerScreenshot)
             }
         }
+    }
+
+    private fun downloadMagnet() {
+
     }
 
     private fun downloadTorrent() {
